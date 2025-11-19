@@ -1,0 +1,31 @@
+{
+  "name": "truthscore-app",
+  "version": "1.0.0",
+  "description": "YouTube money video truth-o-meter",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "build:css": "tailwindcss -i input.css -o dist/output.css --minify",
+    "watch:css": "tailwindcss -i input.css -o dist/output.css --watch"
+  },
+  "keywords": [
+    "youtube",
+    "api",
+    "scam"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.8",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.19",
+    "nodemon": "^3.1.0",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3"
+  }
+}
