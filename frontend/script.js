@@ -7,7 +7,7 @@
 // When testing locally, your backend runs on:
 //    http://localhost:3000
 //
-const BACKEND_URL = "http://localhost:3000";
+const BACKEND_URL = "https://truthscore.onrender.com";
 const DEMO_VIDEO_ID = 'dQw4w9WgXcQ'; // Rick Astley - Change this to a high-risk video for a better demo
 
 
@@ -237,4 +237,5 @@ ${analysis.flags.map(f => "- " + f.text).join("\n")}
 
     // Scroll to results
     window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+
 }
