@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NBX85PJ1YJ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-NBX85PJ1YJ');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>TruthScore - YouTube Video Scam Detector | Validate Make Money Videos Instantly</title>
+    <meta name="description" content="Free AI-powered tool to detect scams in 'make money online' YouTube videos. Instant analysis of titles, comments, engagement patterns, and channel credibility. Stop wasting time on fake opportunities.">
+    <meta name="keywords" content="youtube scam detector, make money online validator, video scam checker, passive income scam detector, get rich quick detector, youtube credibility checker">
+    <meta name="author" content="TruthScore">
+    <meta name="robots" content="index, follow">
+    
+    <meta property="og:title" content="TruthScore - YouTube Video Scam Detector">
+    <meta property="og:description" content="Instantly validate 'make money online' YouTube videos. Free AI-powered scam detection.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://yourdomain.com">
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🛡️</text></svg>">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="container">
+        <header>
+            <div class="header-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M12 2 3 5v6c0 5 3.4 9.7 9 11 5.6-1.3 9-6 9-11V5z" />
+                    <path d="M9.5 11.5 11.5 13.5 15 10" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div>
+                <h1>TruthScore.</h1>
+                <p>AI-powered YouTube "make money" video scam detector</p>
+            </div>
+        </header>
+
+        <section class="card input-section">
+            <label for="videoInput">Paste YouTube URL or ID</label>
+            <div class="input-group">
+                <input id="videoInput" type="text" placeholder="e.g. https://youtube.com/watch?v=dQw4w9WgXcQ" />
+                <button id="analyzeBtn" class="btn-primary">Analyze</button>
+            </div>
+            <button id="demoBtn" class="btn-demo" type="button">Try Demo Video</button>
+            <div id="inputError" class="error-message hidden"></div>
+        </section>
+
+        <section id="resultSection" class="hidden result-section">
+            <div id="summaryCard" class="card summary-card">
+                <div class="video-info">
+                    <h2 id="videoTitle"></h2>
+                    <p id="channelInfo"></p>
+                    <div id="metaInfo"></div>
+                </div>
+                <div class="score-container">
+                    <div id="truth-score-display" class="score-badge">--</div>
+                    <div class="score-label">TruthScore</div>
+                </div>
+            </div>
+
+            <div class="grid-stats">
+                 <div class="card stat-card">
+                    <div class="stat-label">Channel Trust Score</div>
+                    <div id="channel-trust-display" class="stat-value">--</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-label">Dislike Ratio (of total votes)</div>
+                    <div id="dislike-ratio-display" class="stat-value">--</div>
+                    <div id="total-votes-display" class="stat-sub-value">--</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-label">Engagement Ratio (Total Votes/Views)</div>
+                    <div id="engagement-ratio-display" class="stat-value">--</div>
+                </div>
+            </div>
+
+
+            <div id="flagsCard" class="card">
+                <h3>Key Red Flags & Insights</h3>
+                <ul id="flagsList" class="flags-list">
+                    </ul>
+            </div>
+
+            <div class="button-group">
+                <button id="copyReport" class="btn-secondary">Copy Summary</button>
+                <button id="analyzeAnother" class="btn-primary">Analyze another</button>
+            </div>
+        </section>
+
+        <section class="card">
+            <h3>Why TruthScore?</h3>
+            <p style="color: var(--color-text-secondary); margin-top: 0.5rem;">
+                YouTube is flooded with videos promising easy money. TruthScore protects you by analyzing hidden metrics like dislike ratios, comment sentiment, and manipulative language patterns.
+            </p>
+        </section>
+
+        <footer>
+            <p><strong>Disclaimer:</strong> TruthScore provides probabilistic signals based on public data. Always research before spending money. We use ReturnYouTubeDislike API for dislike data.</p>
+            <p style="margin-top: 0.5rem; font-size: 0.7rem;">© 2025 TruthScore.</p>
+        </footer>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
