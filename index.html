@@ -6,307 +6,149 @@
     
     <title>TruthScore - Check if a YouTube “make money” video is lying — in 10 seconds</title>
     <meta name="description" content="Check if a YouTube “make money” video is lying — in 10 seconds. Detect scam signals most people miss: fake engagement, manipulative language, and suspicious patterns.">
-    <meta name="keywords" content="youtube scam detector, make money online validator, video scam checker, passive income scam detector, get rich quick detector, youtube credibility checker">
-    <meta name="author" content="TruthScore">
-    <meta name="robots" content="index, follow">
     
-    <meta property="og:title" content="TruthScore - YouTube Video Scam Detector">
-    <meta property="og:description" content="Instantly validate 'make money online' YouTube videos. Free AI-powered scam detection.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://yourdomain.com">
+    <link rel="stylesheet" href="style.css">
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🛡️</text></svg>">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        }
-        .spinner {
-            border: 4px solid rgba(59, 130, 246, 0.3);
-            border-top-color: #3b82f6;
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .progress-bar {
-            transition: width 1s ease-out;
-        }
-    </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+<body>
 
-    <header class="bg-white shadow-md border-b border-gray-200 sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 py-5">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl md:text-3xl font-bold text-gray-900">TruthScore</h1>
-                        <p class="text-xs md:text-sm text-gray-600">AI-Powered Scam Detector</p>
-                    </div>
-                </div>
+    <main class="container">
+        <header>
+            <div class="header-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M12 2 3 5v6c0 5 3.4 9.7 9 11 5.6-1.3 9-6 9-11V5z" />
+                    <path d="M9.5 11.5 11.5 13.5 15 10" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
             </div>
-        </div>
-    </header>
+            <div>
+                <h1>TruthScore.</h1>
+                <p>AI-Powered Scam Detector</p>
+            </div>
+        </header>
 
-    <main class="max-w-6xl mx-auto px-4 py-8 md:py-12">
-        
-        <div id="landingPage">
-            <section class="text-center mb-12 fade-in">
-                <h2 class="text-3xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
-                    Check if a YouTube “make money” video is lying — in 10 seconds
-                </h2>
-                <p class="text-lg md:text-xl text-gray-600 mb-4 max-w-3xl mx-auto">
+        <section class="card input-section">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h2 style="font-size: 2rem; line-height: 1.2; margin-bottom: 1rem;">Check if a YouTube “make money” video is lying — in 10 seconds</h2>
+                <p style="color: var(--color-text-secondary); font-size: 1.1rem;">
                     Detect scam signals most people miss: fake engagement, manipulative language, and suspicious patterns.
                 </p>
-                <p class="text-base italic text-gray-500 mb-12 max-w-2xl mx-auto">
-                    "I got tired of seeing people fall for fake guru videos — so I built this."
-                </p>
+            </div>
 
-                <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-3xl mx-auto">
-                    <label for="videoUrl" class="block text-left text-lg font-semibold text-gray-700 mb-3">Paste a YouTube video link 👇</label>
+            <label for="videoInput" style="display:block; margin-bottom:0.5rem; font-weight:600;">Paste a YouTube video link 👇</label>
+            <div class="input-group">
+                <input id="videoInput" type="text" placeholder="https://youtube.com/watch?v=..." />
+                <button id="analyzeBtn" class="btn-primary">Check for Scam</button>
+            </div>
+            
+            <div style="text-align: center; margin-top: 1rem;">
+                <span style="color: #6b7280; font-size: 0.9rem;">Not sure?</span>
+                <button id="demoBtn" class="btn-demo" type="button">Try a known scam video &rarr;</button>
+            </div>
+            
+            <div id="inputError" class="error-message hidden"></div>
+        </section>
 
-                    <div class="flex flex-col md:flex-row gap-3">
-                        <input
-                            type="url"
-                            id="videoUrl"
-                            placeholder="https://youtube.com/watch?v=..."
-                            class="flex-1 px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none text-base md:text-lg"
-                            onkeypress="if(event.key==='Enter') analyzeVideo()"
-                        />
-                        <button
-                            onclick="analyzeVideo()"
-                            class="px-8 md:px-10 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 whitespace-nowrap"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
-                            Check for Scam
-                        </button>
+        <section class="card" style="border: 1px solid #e5e7eb; opacity: 0.8;">
+            <h3 style="font-size: 1rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem;">Example Result</h3>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                <span class="score-badge score-low" style="font-size: 2rem;">78%</span>
+                <span class="score-label" style="font-size: 1.2rem; font-weight: bold; color: var(--color-red);">High Scam Risk</span>
+            </div>
+            <ul class="flags-list">
+                <li class="flag-item">
+                    <div class="flag-dot flag-red"></div>
+                    <div>
+                        <div class="flag-text">High manipulative language detected</div>
                     </div>
-                    <div id="errorMessage" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"></div>
-                    
-                    <p class="text-sm text-gray-500 mt-4 text-center">
-                        <span class="text-gray-500">Not sure?</span>
-                        <button onclick="demoVideo()" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-1 transition-colors">
-                            Try a known scam video &rarr;
-                        </button>
-                    </p>
+                </li>
+                <li class="flag-item">
+                    <div class="flag-dot flag-yellow"></div>
+                    <div>
+                        <div class="flag-text">Suspicious engagement ratio</div>
+                    </div>
+                </li>
+            </ul>
+        </section>
+
+        <section id="resultSection" class="hidden result-section">
+            <div id="summaryCard" class="card summary-card">
+                <div class="video-info">
+                    <h2 id="videoTitle"></h2>
+                    <p id="channelInfo"></p>
+                    <div id="metaInfo"></div>
                 </div>
-            </section>
-
-            <section class="mt-8 mb-16 max-w-xl mx-auto p-6 bg-white border border-gray-200 rounded-2xl shadow-xl fade-in">
-                <h3 class="text-xl font-bold text-gray-900 mb-4 border-b pb-2">Example Result (Demo Data)</h3>
-                <div class="flex items-center justify-between mb-4">
-                    <span class="text-2xl font-extrabold text-red-600 flex items-center gap-2">
-                        ⚠️ Scam Likelihood:
-                    </span>
-                    <span class="text-4xl font-extrabold text-red-600">78%</span>
-                </div>
-                <ul class="space-y-3 text-gray-700 list-none p-0">
-                    <li class="flex items-start gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mt-1 flex-shrink-0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                        <span class="font-medium text-lg">High manipulative language detected in transcript</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mt-1 flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        <span class="font-medium text-lg">Suspicious engagement ratio (high views, low quality comments)</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mt-1 flex-shrink-0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                        <span class="font-medium text-lg">Negative comment sentiment analysis (mentions of "scam" and "fake")</span>
-                    </li>
-                </ul>
-            </section>
-
-
-            <section class="mt-16">
-                <h3 class="text-2xl font-bold text-center text-gray-900 mb-10">
-                    How TruthScore Finds The Lies
-                </h3>
-                <div class="grid md:grid-cols-3 gap-8">
-                    <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
-                        <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-5">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                        </div>
-                        <h4 class="text-xl font-semibold text-gray-900 mb-3">Instant Red Flag Detection</h4>
-                        <p class="text-gray-600">
-                            Scans for unrealistic claims, fake urgency, hidden costs, and manipulative language patterns commonly used by scammers.
-                        </p>
-                    </div>
-                    
-                    <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
-                        <div class="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center mb-5">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                        </div>
-                        <h4 class="text-xl font-semibold text-gray-900 mb-3">Real Comment Analysis</h4>
-                        <p class="text-gray-600">
-                            Analyzes actual viewer comments to detect patterns of complaints, refund requests, and warnings from people who tried it.
-                        </p>
-                    </div>
-                    
-                    <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
-                        <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-5">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
-                        </div>
-                        <h4 class="text-xl font-semibold text-gray-900 mb-3">Dislike Ratio Tracking</h4>
-                        <p class="text-gray-600">
-                            Uses ReturnYouTubeDislike API to show real dislike counts and ratios that YouTube hides from public view.
-                        </p>
-                    </div>
-                </div>
-            </section>
-
-            <section class="mt-16 max-w-4xl mx-auto">
-                <h3 class="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-8">
-                    Why TruthScore?
-                </h3>
-                <div class="grid md:grid-cols-2 gap-6 bg-white rounded-2xl p-8 shadow-xl">
-                    <ul class="space-y-4 text-left text-lg text-gray-700">
-                        <li class="flex items-start gap-3">
-                            <span class="text-green-600 font-bold text-2xl mt-[-2px]">&check;</span>
-                            <div>
-                                <strong class="text-gray-900">Hidden dislikes & engagement signals</strong>
-                                <p class="text-sm text-gray-500">We analyze real-time engagement data, including private dislike counts.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-green-600 font-bold text-2xl mt-[-2px]">&check;</span>
-                            <div>
-                                <strong class="text-gray-900">Manipulative language detection</strong>
-                                <p class="text-sm text-gray-500">AI scans the script for urgency tactics, false scarcity, and unrealistic claims.</p>
-                            </div>
-                        </li>
-                    </ul>
-                    <ul class="space-y-4 text-left text-lg text-gray-700">
-                        <li class="flex items-start gap-3">
-                            <span class="text-green-600 font-bold text-2xl mt-[-2px]">&check;</span>
-                            <div>
-                                <strong class="text-gray-900">Comment sentiment analysis</strong>
-                                <p class="text-sm text-gray-500">We aggregate viewer feedback to find hidden complaints and warnings.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-green-600 font-bold text-2xl mt-[-2px]">&check;</span>
-                            <div>
-                                <strong class="text-gray-900">Works in seconds — no signup</strong>
-                                <p class="text-sm text-gray-500">Get a result instantly and anonymously. No email required.</p>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-                <p class="text-center text-lg text-gray-700 mt-6 max-w-xl mx-auto">
-                    Most scam videos look legit on the surface. <strong class="text-gray-900">TruthScore checks what creators don’t want you to see.</strong>
-                </p>
-            </section>
-
-            <div id="analyzingPage" class="hidden text-center py-20 fade-in">
-                <div class="spinner mx-auto mb-6"></div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-3">Analyzing Video for Scam Signals...</h3>
-                <p class="text-gray-600 mb-8 max-w-lg mx-auto">
-                    This takes about 5-10 seconds as we analyze all available data points (engagement, comments, channel history).
-                </p>
-                <div class="max-w-md mx-auto">
-                    <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-700">
-                        <div id="progressBar" class="progress-bar bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
-                    </div>
-                    <div class="space-y-3 text-left">
-                        <div id="progressStep1" class="text-sm text-gray-700 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><circle cx="12" cy="12" r="10"></circle></svg> <span>Fetching video metadata</span> 
-                        </div>
-                        <div id="progressStep2" class="text-sm text-gray-700 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><circle cx="12" cy="12" r="10"></circle></svg> <span>Analyzing comments & transcript</span>
-                        </div>
-                        <div id="progressStep3" class="text-sm text-gray-700 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><circle cx="12" cy="12" r="10"></circle></svg> <span>Checking engagement</span> 
-                        </div>
-                    </div>
+                <div class="score-container">
+                    <div id="truth-score-display" class="score-badge">--</div>
+                    <div class="score-label">TruthScore</div>
                 </div>
             </div>
 
-        </div> <div id="resultsPage" class="hidden"></div>
-    </main>
+            <div class="grid-stats">
+                 <div class="card stat-card">
+                    <div class="stat-label">Channel Trust Score</div>
+                    <div id="channel-trust-display" class="stat-value">--</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-label">Dislike Ratio (of total votes)</div>
+                    <div id="dislike-ratio-display" class="stat-value">--</div>
+                    <div id="total-votes-display" class="stat-sub-value">--</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-label">Engagement Ratio (Total Votes/Views)</div>
+                    <div id="engagement-ratio-display" class="stat-value">--</div>
+                </div>
+            </div>
 
-    <footer class="bg-white border-t border-gray-200 mt-20">
-        <div class="max-w-6xl mx-auto px-4 py-12">
-            <p class="text-center text-sm text-yellow-700 bg-yellow-100 p-3 rounded-xl max-w-3xl mx-auto mb-10 border border-yellow-200 shadow-inner">
+            <div id="flagsCard" class="card">
+                <h3>Key Red Flags & Insights</h3>
+                <ul id="flagsList" class="flags-list">
+                    </ul>
+            </div>
+
+            <div class="button-group">
+                <button id="copyReport" class="btn-secondary">Copy Summary</button>
+                <button id="analyzeAnother" class="btn-primary">Analyze another</button>
+            </div>
+        </section>
+
+        <section class="mt-16 max-w-4xl mx-auto" style="margin-top: 3rem;">
+            <h3 class="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-8" style="text-align: center; margin-bottom: 2rem;">
+                Why TruthScore?
+            </h3>
+            <div class="card">
+                <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+                    <div style="display: flex; gap: 10px;">
+                        <span style="color: green; font-weight: bold;">✓</span>
+                        <div><strong>Hidden dislikes</strong> – We verify real engagement data.</div>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <span style="color: green; font-weight: bold;">✓</span>
+                        <div><strong>Manipulative language</strong> – AI scans for urgency tactics.</div>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <span style="color: green; font-weight: bold;">✓</span>
+                        <div><strong>Comment sentiment</strong> – We find hidden complaints.</div>
+                    </div>
+                </div>
+                <p style="text-align: center; margin-top: 1.5rem; font-style: italic;">
+                    Most scam videos look legit on the surface. <strong>TruthScore checks what creators don’t want you to see.</strong>
+                </p>
+            </div>
+        </section>
+
+        <footer>
+            <p style="background: #fef3c7; color: #92400e; padding: 0.5rem; border-radius: 4px; display: inline-block; margin-bottom: 1rem;">
                 ⚠️ TruthScore provides risk indicators, not guarantees. Always use judgment.
             </p>
+            <p><strong>Disclaimer:</strong> TruthScore provides probabilistic signals based on public data. We use ReturnYouTubeDislike API for dislike data.</p>
+            
+            <a href="https://www.buymeacoffee.com/YOUR_USERNAME" target="_blank" class="btn-secondary" style="margin-top: 1rem; display: inline-block; font-size: 0.8rem;">☕ Buy me a coffee</a>
+            
+            <p style="margin-top: 0.5rem; font-size: 0.7rem;">© 2025 TruthScore.</p>
+        </footer>
+    </main>
 
-            <div class="grid md:grid-cols-3 gap-8 mb-8">
-                <div>
-                    <div class="flex items-center gap-2 mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                        <span class="font-bold text-lg">TruthScore</span>
-                    </div>
-                    <p class="text-gray-600 text-sm"> Free tool to detect scams in "make money online" YouTube videos. Protect your time and money with instant, unbiased analysis.</p>
-                </div>
-                </div>
-        </div>
-    </footer>
-    
-    <script>
-        // Note: The rest of the script (analyzeVideo, displayResults, etc.) should be in script.js
-        // For a single HTML file, all the script functions (like analyzeVideo, demoVideo, showPage, etc.)
-        // would need to be in a <script> tag here or linked externally. Assuming the separate
-        // script.js file still contains the necessary functions.
-        
-        // ============================================
-        // QUICK FUNCTIONS FOR HTML TO WORK (if used in a single file)
-        // ============================================
-        
-        // Placeholder/Stub for analyzeVideo() and demoVideo()
-        function analyzeVideo() {
-            // Placeholder: In a real environment, this calls your backend.
-            const url = document.getElementById('videoUrl').value.trim();
-            if (url === 'https://youtube.com/watch?v=...') {
-                // Simulate success for the demo placeholder if no script.js is loaded
-                console.log('Simulating analysis for demo URL...');
-            } else if (url) {
-                console.log('Analyzing video: ' + url);
-                // In production, call your backend API here
-                // showPage('analyzingPage'); 
-            } else {
-                showError('Please enter a YouTube video link 👇');
-            }
-        }
-
-        function demoVideo() {
-            // Update the input field with a demo URL
-            document.getElementById('videoUrl').value = 'https://youtu.be/dQw4w9WgXcQ'; // Use a standard demo ID
-            // Automatically call analyzeVideo if desired, or let the user click the button
-            // analyzeVideo(); 
-        }
-
-        function showError(message) { 
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.classList.remove('hidden');
-            setTimeout(() => errorDiv.classList.add('hidden'), 5000); 
-        }
-
-        function showPage(pageId) { 
-             ['landingPage', 'analyzingPage', 'resultsPage'].forEach(id => {
-                 const el = document.getElementById(id);
-                 if (el) el.classList.add('hidden');
-             });
-             const targetEl = document.getElementById(pageId);
-             if (targetEl) targetEl.classList.remove('hidden');
-        }
-
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
