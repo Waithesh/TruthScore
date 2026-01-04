@@ -1,15 +1,14 @@
-/* style.css - Custom Design */
+/* style.css - Custom Design with SEO Content Styles */
 
 /* == 1. Variables and Base Styles == */
 :root {
-    --color-primary: #4f46e5; /* Indigo-600 */
-    --color-primary-dark: #3730a3; /* Indigo-800 */
-    --color-text-primary: #1f2937; /* Gray-900 */
-    --color-text-secondary: #6b7280; /* Gray-500 */
-    --color-bg-light: #f9fafb; /* Gray-50 */
+    --color-primary: #4f46e5;
+    --color-primary-dark: #3730a3;
+    --color-text-primary: #1f2937;
+    --color-text-secondary: #6b7280;
+    --color-bg-light: #f9fafb;
     --color-bg-card: #ffffff;
-    --color-border: #e5e7eb; /* Gray-200 */
-
+    --color-border: #e5e7eb;
     --color-red: #ef4444;
     --color-yellow: #f59e0b;
     --color-green: #10b981;
@@ -54,7 +53,7 @@ header {
     width: 3.5rem;
     height: 3.5rem;
     border-radius: 0.5rem;
-    background-image: linear-gradient(to right bottom, #3b82f6, #4f46e5); /* Blue to Indigo */
+    background-image: linear-gradient(to right bottom, #3b82f6, #4f46e5);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -128,7 +127,7 @@ header p {
     color: var(--color-text-primary);
 }
 .btn-secondary:hover {
-    background-color: #d1d5db; /* Gray-300 */
+    background-color: #d1d5db;
 }
 
 .btn-demo {
@@ -154,7 +153,7 @@ header p {
 /* == 5. Error Message == */
 .error-message {
     padding: 0.75rem;
-    background-color: #fee2e2; /* Red-100 */
+    background-color: #fee2e2;
     color: var(--color-red);
     border-radius: 0.5rem;
     font-size: 0.875rem;
@@ -211,7 +210,6 @@ header p {
 .score-medium { color: var(--color-yellow); }
 .score-high { color: var(--color-green); }
 
-
 /* == 7. Grid Stats == */
 .grid-stats {
     display: grid;
@@ -223,9 +221,9 @@ header p {
 .stat-card {
     padding: 1rem;
     text-align: center;
-    background-color: #eff6ff; /* Blue-50 subtle background */
+    background-color: #eff6ff;
     box-shadow: none;
-    border: 1px solid #bfdbfe; /* Blue-200 border */
+    border: 1px solid #bfdbfe;
 }
 
 .stat-label {
@@ -244,7 +242,6 @@ header p {
 }
 .stat-red { color: var(--color-red); }
 .stat-yellow { color: var(--color-yellow); }
-
 
 /* == 8. Flags List == */
 .flags-list {
@@ -289,10 +286,100 @@ header p {
 .flag-green { background-color: var(--color-green); }
 .flag-blue { background-color: var(--color-blue); }
 
-/* == 9. Footer == */
+/* == 9. SEO CONTENT SECTION == */
+.seo-content {
+    max-width: 800px;
+    margin: 4rem auto;
+    padding: 0 1rem;
+    line-height: 1.8;
+}
+
+.seo-content h2 {
+    font-size: 2rem;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    color: #1f2937;
+    font-weight: 700;
+}
+
+.seo-content h3 {
+    font-size: 1.5rem;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    color: #374151;
+    font-weight: 600;
+}
+
+.seo-content h4 {
+    font-size: 1.25rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: #4b5563;
+    font-weight: 600;
+}
+
+.seo-content p {
+    margin-bottom: 1.25rem;
+    color: #4b5563;
+    font-size: 1.05rem;
+}
+
+.seo-content ul, .seo-content ol {
+    margin-bottom: 1.5rem;
+    padding-left: 2rem;
+}
+
+.seo-content li {
+    margin-bottom: 0.75rem;
+    color: #4b5563;
+    font-size: 1.05rem;
+}
+
+.seo-content strong {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.seo-content a {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+.seo-content a:hover {
+    color: var(--color-primary-dark);
+}
+
+/* == 10. Footer == */
 footer {
     margin-top: 3rem;
     text-align: center;
     font-size: 0.75rem;
     color: var(--color-text-secondary);
+}
+
+/* == 11. Responsive Design == */
+@media (max-width: 768px) {
+    .input-group {
+        flex-direction: column;
+    }
+    
+    #videoInput {
+        width: 100%;
+    }
+    
+    .btn-primary {
+        width: 100%;
+    }
+    
+    .seo-content {
+        padding: 0 1.5rem;
+    }
+    
+    .seo-content h2 {
+        font-size: 1.75rem;
+    }
+    
+    .seo-content h3 {
+        font-size: 1.35rem;
+    }
 }
