@@ -3,12 +3,8 @@
 // ===============================
 // CONFIG
 // ===============================
-
-// When testing locally, your backend runs on:
-//    http://localhost:3000
-//
 const BACKEND_URL = "https://truthscore.onrender.com";
-const DEMO_VIDEO_ID = 'dQw4w9WgXcQ'; // Rick Astley - Change this to a high-risk video for a better demo
+const DEMO_VIDEO_ID = 'dQw4w9WgXcQ';
 
 
 // ===============================
@@ -27,7 +23,6 @@ function extractVideoId(url) {
         if (m) return m[1];
     }
 
-    // fallback attempt using URL parsing
     try {
         const u = new URL(url.includes("://") ? url : "https://youtube.com/watch?v=" + url);
         return u.searchParams.get("v") || null;
@@ -86,127 +81,181 @@ function showInputError(msg) {
 
 
 // ===============================
-// LOADING UI WITH PROGRESS
+// LOADING OVERLAY
 // ===============================
-function showLoadingUI() {
-    // Hide any previous errors
-    inputError.classList.add("hidden");
-    
-    // Create loading overlay
-    const loadingHTML = `
-        <div id="loadingOverlay" style="
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        ">
-            <div style="
+function createLoadingOverlay() {
+    const overlay = document.createElement('div');
+    overlay.id = 'loadingOverlay';
+    overlay.innerHTML = `
+        <style>
+            #loadingOverlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 99999;
+                animation: fadeIn 0.3s;
+            }
+            
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            
+            #loadingBox {
                 background: white;
                 padding: 2.5rem;
-                border-radius: 12px;
-                max-width: 500px;
+                border-radius: 16px;
+                max-width: 520px;
                 width: 90%;
                 text-align: center;
-                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            ">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
-                <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem; color: #1f2937;">
-                    Waking up the AI analysis engine...
-                </h3>
-                <p id="loadingMessage" style="color: #6b7280; font-size: 1rem; margin-bottom: 1.5rem;">
-                    Starting analysis...
-                </p>
-                
-                <!-- Progress Bar -->
-                <div style="
-                    width: 100%;
-                    height: 8px;
-                    background: #e5e7eb;
-                    border-radius: 4px;
-                    overflow: hidden;
-                    margin-bottom: 1.5rem;
-                ">
-                    <div id="progressBar" style="
-                        width: 0%;
-                        height: 100%;
-                        background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-                        transition: width 0.3s ease;
-                    "></div>
-                </div>
-                
-                <div style="
-                    background: #fef3c7;
-                    padding: 1rem;
-                    border-radius: 8px;
-                    border-left: 4px solid #f59e0b;
-                    text-align: left;
-                    margin-bottom: 1rem;
-                ">
-                    <p style="color: #92400e; font-size: 0.9rem; margin: 0 0 0.5rem 0;">
-                        <strong>⚡ Free Plan:</strong> Analysis takes ~45 seconds
-                    </p>
-                    <p style="color: #78350f; font-size: 0.85rem; margin: 0;">
-                        This happens because our free server needs to wake up from sleep mode.
-                    </p>
-                </div>
-                
-                <a href="#donate" onclick="document.getElementById('loadingOverlay').remove()" style="
-                    display: inline-block;
-                    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-                    color: white;
-                    padding: 0.75rem 1.5rem;
-                    border-radius: 6px;
-                    text-decoration: none;
-                    font-weight: 600;
-                    font-size: 0.95rem;
-                    transition: transform 0.2s;
-                " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                    ☕ Support TruthScore & Keep Servers Awake
-                </a>
-                <p style="color: #9ca3af; font-size: 0.8rem; margin-top: 0.75rem;">
-                    Just $7/month keeps the server running 24/7 for everyone
-                </p>
+                box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+            }
+            
+            #loadingIcon {
+                font-size: 3.5rem;
+                margin-bottom: 1rem;
+                animation: pulse 2s infinite;
+            }
+            
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+            }
+            
+            #loadingTitle {
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin-bottom: 0.5rem;
+                color: #1f2937;
+            }
+            
+            #loadingMessage {
+                color: #6b7280;
+                font-size: 1rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            #progressBarContainer {
+                width: 100%;
+                height: 10px;
+                background: #e5e7eb;
+                border-radius: 5px;
+                overflow: hidden;
+                margin-bottom: 1.5rem;
+            }
+            
+            #progressBar {
+                width: 0%;
+                height: 100%;
+                background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+                transition: width 0.5s ease;
+            }
+            
+            #upgradeBox {
+                background: #fef3c7;
+                padding: 1.25rem;
+                border-radius: 10px;
+                border-left: 5px solid #f59e0b;
+                text-align: left;
+                margin-bottom: 1.25rem;
+            }
+            
+            #upgradeBox p {
+                margin: 0;
+                color: #92400e;
+                font-size: 0.95rem;
+                line-height: 1.5;
+            }
+            
+            #upgradeBox strong {
+                color: #78350f;
+            }
+            
+            #supportBtn {
+                display: inline-block;
+                background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+                color: white;
+                padding: 0.85rem 1.75rem;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 700;
+                font-size: 1rem;
+                transition: all 0.2s;
+                cursor: pointer;
+                border: none;
+            }
+            
+            #supportBtn:hover {
+                transform: scale(1.05);
+                box-shadow: 0 5px 20px rgba(59, 130, 246, 0.4);
+            }
+            
+            #supportNote {
+                color: #9ca3af;
+                font-size: 0.85rem;
+                margin-top: 0.75rem;
+            }
+        </style>
+        
+        <div id="loadingBox">
+            <div id="loadingIcon">⏳</div>
+            <h3 id="loadingTitle">Waking up the AI analysis engine...</h3>
+            <p id="loadingMessage">Starting analysis...</p>
+            
+            <div id="progressBarContainer">
+                <div id="progressBar"></div>
             </div>
+            
+            <div id="upgradeBox">
+                <p><strong>⚡ Free Plan:</strong> Analysis takes ~45 seconds</p>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem;">This happens because our free server needs to wake up from sleep mode.</p>
+            </div>
+            
+            <button id="supportBtn" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'}); document.getElementById('loadingOverlay').remove();">
+                ☕ Support TruthScore & Keep Servers Awake
+            </button>
+            <p id="supportNote">Just $7/month keeps the server running 24/7 for everyone</p>
         </div>
     `;
     
-    document.body.insertAdjacentHTML('beforeend', loadingHTML);
+    document.body.appendChild(overlay);
     
-    // Simulate progress stages
-    const messages = [
-        { time: 0, text: "Waking up server...", progress: 10 },
-        { time: 8000, text: "Server online, connecting...", progress: 30 },
-        { time: 15000, text: "Fetching video data...", progress: 50 },
-        { time: 25000, text: "Analyzing comments...", progress: 70 },
-        { time: 35000, text: "Calculating scam score...", progress: 85 },
-        { time: 42000, text: "Almost done...", progress: 95 }
+    // Progress animation
+    const stages = [
+        { time: 0, msg: "Waking up server...", progress: 10 },
+        { time: 8000, msg: "Server online, connecting...", progress: 30 },
+        { time: 15000, msg: "Fetching video data...", progress: 50 },
+        { time: 25000, msg: "Analyzing comments...", progress: 70 },
+        { time: 35000, msg: "Calculating scam score...", progress: 85 },
+        { time: 42000, msg: "Almost done...", progress: 95 }
     ];
     
-    messages.forEach(({ time, text, progress }) => {
+    stages.forEach(stage => {
         setTimeout(() => {
             const msgEl = document.getElementById('loadingMessage');
-            const progressBar = document.getElementById('progressBar');
-            if (msgEl) msgEl.textContent = text;
-            if (progressBar) progressBar.style.width = `${progress}%`;
-        }, time);
+            const bar = document.getElementById('progressBar');
+            if (msgEl && bar) {
+                msgEl.textContent = stage.msg;
+                bar.style.width = stage.progress + '%';
+            }
+        }, stage.time);
     });
 }
 
-function hideLoadingUI() {
-    const overlay = document.getElementById('loadingOverlay');
-    if (overlay) {
-        // Animate to 100% before removing
-        const progressBar = document.getElementById('progressBar');
-        if (progressBar) progressBar.style.width = '100%';
-        
-        setTimeout(() => overlay.remove(), 300);
-    }
+function removeLoadingOverlay() {
+    const bar = document.getElementById('progressBar');
+    if (bar) bar.style.width = '100%';
+    
+    setTimeout(() => {
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) overlay.remove();
+    }, 400);
 }
 
 
@@ -229,13 +278,11 @@ async function runAnalyze(optionalId) {
         return;
     }
     
-    // Clear previous results
     resultSection.classList.add('hidden');
-
-    // Show loading UI with progress
-    showLoadingUI();
     
-    // Disable button
+    // Show loading overlay
+    createLoadingOverlay();
+    
     analyzeBtn.disabled = true;
     analyzeBtn.textContent = "Analyzing...";
 
@@ -253,14 +300,11 @@ async function runAnalyze(optionalId) {
 
         const data = await response.json();
         
-        // Hide loading UI
-        hideLoadingUI();
-        
-        // Render results
+        removeLoadingOverlay();
         renderResults(data);
 
     } catch (error) {
-        hideLoadingUI();
+        removeLoadingOverlay();
         showInputError(error.message || "Failed to analyze the video. Check backend URL or server status.");
     } finally {
         analyzeBtn.disabled = false;
@@ -270,14 +314,13 @@ async function runAnalyze(optionalId) {
 
 
 // ===============================
-// RENDER RESULTS (Pure CSS updates)
+// RENDER RESULTS
 // ===============================
 function renderResults(payload) {
     resultSection.classList.remove("hidden");
     const { video, analysis } = payload;
     const score = Math.round(analysis.score);
 
-    // 1. Populate video info
     videoTitle.textContent = video.title;
     channelInfo.textContent = `${video.channelTitle} • ${video.channelAgeYears || 0} years old`;
     
@@ -290,9 +333,8 @@ function renderResults(payload) {
         `${video.viewCount.toLocaleString()} views • ${votesText} • ` +
         `${video.commentCount.toLocaleString()} comments`;
 
-    // 2. Main Score (TruthScore)
     scoreDisplay.textContent = `${score}%`;
-    scoreDisplay.className = 'score-badge'; // Reset classes
+    scoreDisplay.className = 'score-badge';
     if (score >= 75) {
         scoreDisplay.classList.add('score-high');
         scoreLabel.textContent = "Likely Legit";
@@ -304,7 +346,6 @@ function renderResults(payload) {
         scoreLabel.textContent = "High Risk";
     }
 
-    // 3. New Stat Cards
     channelTrustDisplay.textContent = `${Math.round(analysis.channelTrustScore)}/100`;
     
     const dislikeRatioPercent = (analysis.likeDislikeRatio * 100).toFixed(1);
@@ -319,11 +360,8 @@ function renderResults(payload) {
     totalVotesDisplay.textContent = `${totalVotes.toLocaleString()} total votes`;
     engagementRatioDisplay.textContent = `${(analysis.engagementRatio * 100).toFixed(3)}%`;
 
-
-    // 4. Flags
     flagsList.innerHTML = "";
     analysis.flags.sort((a, b) => {
-        // Sort Red > Yellow > Blue > Green
         const order = { 'red': 1, 'yellow': 2, 'blue': 3, 'green': 4 };
         return order[a.type] - order[b.type];
     }).forEach(f => {
@@ -345,7 +383,6 @@ function renderResults(payload) {
         flagsList.appendChild(li);
     });
 
-    // 5. Buttons
     copyReport.onclick = () => {
         const summary = `
 TruthScore Analysis
@@ -369,7 +406,5 @@ ${analysis.flags.map(f => "- " + f.text).join("\n")}
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
-    // Scroll to results
     window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-
 }
