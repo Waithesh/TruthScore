@@ -313,6 +313,21 @@
             <button class="btn-new"  id="newBtn">Analyze Another</button>
         </div>
 
+        <!-- PAYPAL SUPPORT CARD -->
+        <div style="background:linear-gradient(135deg,#0a1a0a,#0f1f0f);border:1px solid rgba(34,197,94,.3);border-radius:18px;padding:2rem;text-align:center;margin-bottom:0.75rem;">
+            <div style="font-size:1.75rem;margin-bottom:.5rem;">☕</div>
+            <h3 style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;margin-bottom:.4rem;">Keep TruthScore Free &amp; Fast</h3>
+            <p style="color:var(--muted);font-size:.88rem;max-width:380px;margin:0 auto .75rem;">Our free server sleeps between requests (hence the 45-sec wait). A small donation keeps the lights on for everyone.</p>
+            <div style="display:inline-flex;flex-direction:column;align-items:center;gap:.4rem;">
+                <a href="https://www.paypal.com/donate/?hosted_button_id=JGGHMKAMLZ3X8" target="_blank" rel="noopener"
+                   style="display:inline-block;background:var(--green);color:#fff;padding:.75rem 2rem;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;text-decoration:none;transition:background .2s;"
+                   onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='var(--green)'">
+                    💚 Support on PayPal
+                </a>
+                <span style="font-size:.7rem;color:var(--muted);">Any amount helps — thank you!</span>
+            </div>
+        </div>
+
         <div class="pro-card">
             <div class="pro-badge-lbl">Coming Soon</div>
             <h3>TruthScore Chrome Extension</h3>
@@ -458,10 +473,10 @@
 //  7. Paste it below replacing YOUR_GOOGLE_APPS_SCRIPT_URL_HERE
 //
 // ═══════════════════════════════════════════════════════════════════
-const SHEETS_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxaPe-cbB1hZZ8QKKG2VLO3fo-bFWfaYqBji2_HAkDu7RwV5WkWM3GMrKSpPSPIEvE/exec';
 
 async function postToSheets(payload) {
-    if (SHEETS_URL === 'https://script.google.com/macros/s/AKfycbxaPe-cbB1hZZ8QKKG2VLO3fo-bFWfaYqBji2_HAkDu7RwV5WkWM3GMrKSpPSPIEvE/exec') return; // Not configured yet
+
     try {
         await fetch(SHEETS_URL, {
             method: 'POST',
@@ -474,17 +489,17 @@ async function postToSheets(payload) {
     }
 }
 
-// ── Internal state ──────────────────────────────────────────────
+// ── Internal state — written by script.js via _setGateData ──────
 let _pendingFlags   = [];
 let _reportText     = '';
 let _currentScore   = '--';
 let _currentTitle   = '';
 
-// script.js calls this to hand off flag data after a scan
+// Called from script.js renderResults() after every scan
 window._setGateData = function(flags, reportText, score, title) {
     _pendingFlags = flags;
     _reportText   = reportText;
-    _currentScore = score;
+    _currentScore = String(score);
     _currentTitle = title;
 };
 
