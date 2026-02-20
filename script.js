@@ -1,410 +1,391 @@
-// script.js
+// script.js — TruthScore (fully fixed)
 
-// ===============================
+// ═══════════════════════════════════════════════════════
 // CONFIG
-// ===============================
-const BACKEND_URL = "https://truthscore.onrender.com";
+// ═══════════════════════════════════════════════════════
+const BACKEND_URL   = "https://truthscore.onrender.com";
 const DEMO_VIDEO_ID = 'dQw4w9WgXcQ';
+const SHEETS_URL    = 'https://script.google.com/macros/s/AKfycbxaPe-cbB1hZZ8QKKG2VLO3fo-bFWfaYqBji2_HAkDu7RwV5WkWM3GMrKSpPSPIEvE/exec';
+const PAYPAL_BTN_ID = 'JGGHMKAMLZ3X8';
+const PAYPAL_CLIENT = 'BAAN-6uTeFePPlFBTb2KRwscuk_CN958_Dp1xPe78I33ZlxbgpQfjilAnXMcrm02M5iYbM9Xr2EnqAwPXs';
 
 
-// ===============================
-// EXTRACT VIDEO ID
-// ===============================
+// ═══════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════
+const $  = id  => document.getElementById(id);
+const $q = sel => document.querySelector(sel);
+
+function safeText(id, val) { const el = $(id); if (el) el.textContent = val; }
+function safeHTML(id, val) { const el = $(id); if (el) el.innerHTML  = val; }
+
 function extractVideoId(url) {
     if (!url) return null;
-
     const patterns = [
         /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/i,
         /^([a-zA-Z0-9_-]{11})$/
     ];
-
-    for (const p of patterns) {
-        const m = url.match(p);
-        if (m) return m[1];
-    }
-
+    for (const p of patterns) { const m = url.match(p); if (m) return m[1]; }
     try {
         const u = new URL(url.includes("://") ? url : "https://youtube.com/watch?v=" + url);
         return u.searchParams.get("v") || null;
-    } catch (e) {
-        return null;
-    }
+    } catch (e) { return null; }
+}
+
+async function postToSheets(payload) {
+    try {
+        await fetch(SHEETS_URL, {
+            method: 'POST', mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+    } catch (e) { console.warn('Sheets post failed:', e); }
 }
 
 
-// ===============================
-// DOM ELEMENTS
-// ===============================
-const input = document.getElementById("videoInput");
-const analyzeBtn = document.getElementById("analyzeBtn");
-const demoBtn = document.getElementById("demoBtn"); 
-const inputError = document.getElementById("inputError");
-
-const resultSection = document.getElementById("resultSection");
-const videoTitle = document.getElementById("videoTitle");
-const channelInfo = document.getElementById("channelInfo");
-const metaInfo = document.getElementById("metaInfo");
-
-const scoreDisplay = document.getElementById('truth-score-display');
-const scoreLabel = document.querySelector('.score-label');
-const channelTrustDisplay = document.getElementById('channel-trust-display');
-const dislikeRatioDisplay = document.getElementById('dislike-ratio-display');
-const totalVotesDisplay = document.getElementById('total-votes-display');
-const engagementRatioDisplay = document.getElementById('engagement-ratio-display');
-
-const flagsList = document.getElementById("flagsList");
-
-const copyReport = document.getElementById("copyReport");
-const analyzeAnother = document.getElementById("analyzeAnother");
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let _lastScore   = '--';
+let _lastTitle   = '';
+let _reportText  = '';
+let _paypalDone  = false;
 
 
-// ===============================
-// EVENT HANDLERS
-// ===============================
-analyzeBtn.addEventListener("click", () => runAnalyze());
-input.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") runAnalyze();
-});
-demoBtn.addEventListener('click', () => {
-    input.value = `https://youtu.be/${DEMO_VIDEO_ID}`;
-    runAnalyze(DEMO_VIDEO_ID);
-});
-
-
-// ===============================
-// SHOW ERROR
-// ===============================
-function showInputError(msg) {
-    inputError.textContent = msg;
-    inputError.classList.remove("hidden");
-}
-
-
-// ===============================
-// LOADING OVERLAY
-// ===============================
-function createLoadingOverlay() {
-    const overlay = document.createElement('div');
-    overlay.id = 'loadingOverlay';
-    overlay.innerHTML = `
-        <style>
-            #loadingOverlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.9);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 99999;
-                animation: fadeIn 0.3s;
-            }
-            
-            @keyframes fadeIn {
-                from { opacity: 0; }
-                to { opacity: 1; }
-            }
-            
-            #loadingBox {
-                background: white;
-                padding: 2.5rem;
-                border-radius: 16px;
-                max-width: 520px;
-                width: 90%;
-                text-align: center;
-                box-shadow: 0 25px 80px rgba(0,0,0,0.5);
-            }
-            
-            #loadingIcon {
-                font-size: 3.5rem;
-                margin-bottom: 1rem;
-                animation: pulse 2s infinite;
-            }
-            
-            @keyframes pulse {
-                0%, 100% { transform: scale(1); }
-                50% { transform: scale(1.1); }
-            }
-            
-            #loadingTitle {
-                font-size: 1.5rem;
-                font-weight: 700;
-                margin-bottom: 0.5rem;
-                color: #1f2937;
-            }
-            
-            #loadingMessage {
-                color: #6b7280;
-                font-size: 1rem;
-                margin-bottom: 1.5rem;
-            }
-            
-            #progressBarContainer {
-                width: 100%;
-                height: 10px;
-                background: #e5e7eb;
-                border-radius: 5px;
-                overflow: hidden;
-                margin-bottom: 1.5rem;
-            }
-            
-            #progressBar {
-                width: 0%;
-                height: 100%;
-                background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-                transition: width 0.5s ease;
-            }
-            
-            #upgradeBox {
-                background: #fef3c7;
-                padding: 1.25rem;
-                border-radius: 10px;
-                border-left: 5px solid #f59e0b;
-                text-align: left;
-                margin-bottom: 1.25rem;
-            }
-            
-            #upgradeBox p {
-                margin: 0;
-                color: #92400e;
-                font-size: 0.95rem;
-                line-height: 1.5;
-            }
-            
-            #upgradeBox strong {
-                color: #78350f;
-            }
-            
-            #supportBtn {
-                display: inline-block;
-                background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-                color: white;
-                padding: 0.85rem 1.75rem;
-                border-radius: 8px;
-                text-decoration: none;
-                font-weight: 700;
-                font-size: 1rem;
-                transition: all 0.2s;
-                cursor: pointer;
-                border: none;
-            }
-            
-            #supportBtn:hover {
-                transform: scale(1.05);
-                box-shadow: 0 5px 20px rgba(59, 130, 246, 0.4);
-            }
-            
-            #supportNote {
-                color: #9ca3af;
-                font-size: 0.85rem;
-                margin-top: 0.75rem;
-            }
-        </style>
-        
-        <div id="loadingBox">
-            <div id="loadingIcon">⏳</div>
-            <h3 id="loadingTitle">Waking up the AI analysis engine...</h3>
-            <p id="loadingMessage">Starting analysis...</p>
-            
-            <div id="progressBarContainer">
-                <div id="progressBar"></div>
-            </div>
-            
-            <div id="upgradeBox">
-                <p><strong>⚡ Free Plan:</strong> Analysis takes ~45 seconds</p>
-                <p style="margin-top: 0.5rem; font-size: 0.9rem;">This happens because our free server needs to wake up from sleep mode.</p>
-            </div>
-            
-            <button id="supportBtn" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'}); document.getElementById('loadingOverlay').remove();">
-                ☕ Support TruthScore & Keep Servers Awake
-            </button>
-            <p id="supportNote">Just $7/month keeps the server running 24/7 for everyone</p>
-        </div>
-    `;
-    
-    document.body.appendChild(overlay);
-    
-    // Progress animation
-    const stages = [
-        { time: 0, msg: "Waking up server...", progress: 10 },
-        { time: 8000, msg: "Server online, connecting...", progress: 30 },
-        { time: 15000, msg: "Fetching video data...", progress: 50 },
-        { time: 25000, msg: "Analyzing comments...", progress: 70 },
-        { time: 35000, msg: "Calculating scam score...", progress: 85 },
-        { time: 42000, msg: "Almost done...", progress: 95 }
-    ];
-    
-    stages.forEach(stage => {
-        setTimeout(() => {
-            const msgEl = document.getElementById('loadingMessage');
-            const bar = document.getElementById('progressBar');
-            if (msgEl && bar) {
-                msgEl.textContent = stage.msg;
-                bar.style.width = stage.progress + '%';
-            }
-        }, stage.time);
+// ═══════════════════════════════════════════════════════
+// BOOT — wire all events after DOM ready
+// ═══════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+    $('analyzeBtn')?.addEventListener('click', () => runAnalyze());
+    $('videoInput')?.addEventListener('keypress', e => { if (e.key === 'Enter') runAnalyze(); });
+    $('demoBtn')?.addEventListener('click', () => {
+        $('videoInput').value = `https://youtu.be/${DEMO_VIDEO_ID}`;
+        runAnalyze(DEMO_VIDEO_ID);
     });
+    $('shareBtn')?.addEventListener('click', shareResult);
+    $('copyBtn')?.addEventListener('click',  copyReport);
+    $('newBtn')?.addEventListener('click',   resetTool);
+    $('proModal')?.addEventListener('click', e => { if (e.target === $('proModal')) closeProModal(); });
+});
+
+
+// ═══════════════════════════════════════════════════════
+// LOADING OVERLAY — dark theme matching site
+// ═══════════════════════════════════════════════════════
+function createLoadingOverlay() {
+    if ($('loadingOverlay')) return;
+    const el = document.createElement('div');
+    el.id = 'loadingOverlay';
+    el.innerHTML = `
+    <style>
+      #loadingOverlay{position:fixed;inset:0;background:rgba(0,0,0,.93);display:flex;align-items:center;justify-content:center;z-index:99999;animation:tsOFade .3s}
+      @keyframes tsOFade{from{opacity:0}to{opacity:1}}
+      #tsBox{background:#111;border:1px solid #222;border-radius:18px;padding:2.5rem;max-width:460px;width:90%;text-align:center;box-shadow:0 25px 80px rgba(0,0,0,.8)}
+      #tsIcon{font-size:3rem;margin-bottom:.75rem;display:inline-block;animation:tsPulse 2s infinite}
+      @keyframes tsPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+      #tsTitle{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:#f0f0f0;margin-bottom:.35rem}
+      #tsMsg{color:#666;font-size:.9rem;margin-bottom:1.4rem}
+      #tsBarWrap{width:100%;height:7px;background:#1a1a1a;border-radius:4px;overflow:hidden;margin-bottom:1.4rem}
+      #tsBar{width:0%;height:100%;background:linear-gradient(90deg,#ff3c3c,#ff8080);transition:width .6s ease;border-radius:4px}
+      #tsInfo{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:.9rem 1.1rem;text-align:left;margin-bottom:1.2rem}
+      #tsInfo p{margin:0;color:#fcd34d;font-size:.84rem;line-height:1.5}
+      #tsWaitBtn{background:#ff3c3c;color:#fff;border:none;border-radius:10px;padding:.8rem 1.6rem;font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;transition:background .2s}
+      #tsWaitBtn:hover{background:#b91c1c}
+      #tsSubNote{color:#444;font-size:.75rem;margin-top:.5rem}
+    </style>
+    <div id="tsBox">
+      <div id="tsIcon">🛡️</div>
+      <h3 id="tsTitle">Waking up analysis engine…</h3>
+      <p id="tsMsg">Connecting to server…</p>
+      <div id="tsBarWrap"><div id="tsBar"></div></div>
+      <div id="tsInfo">
+        <p><strong>⚡ Free Plan:</strong> First analysis takes ~45 sec while the server wakes from sleep.</p>
+        <p style="margin-top:.35rem;font-size:.8rem;">Subsequent scans are much faster.</p>
+      </div>
+      <button id="tsWaitBtn" onclick="openProModal();removeLoadingOverlay();">🚀 Join Pro Waitlist — Keep Servers Awake</button>
+      <p id="tsSubNote">Early members get 50% off when we launch</p>
+    </div>`;
+    document.body.appendChild(el);
+
+    [
+        { t: 0,     msg: 'Connecting to server…',    pct: 10 },
+        { t: 8000,  msg: 'Server online…',           pct: 30 },
+        { t: 15000, msg: 'Fetching video data…',     pct: 50 },
+        { t: 25000, msg: 'Scanning comments…',       pct: 70 },
+        { t: 35000, msg: 'Calculating TruthScore…',  pct: 85 },
+        { t: 42000, msg: 'Almost done…',             pct: 95 },
+    ].forEach(s => setTimeout(() => {
+        const m = $('tsMsg'), b = $('tsBar');
+        if (m) m.textContent = s.msg;
+        if (b) b.style.width = s.pct + '%';
+    }, s.t));
 }
 
 function removeLoadingOverlay() {
-    const bar = document.getElementById('progressBar');
-    if (bar) bar.style.width = '100%';
-    
-    setTimeout(() => {
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) overlay.remove();
-    }, 400);
+    const b = $('tsBar'); if (b) b.style.width = '100%';
+    setTimeout(() => $('loadingOverlay')?.remove(), 400);
 }
+window.removeLoadingOverlay = removeLoadingOverlay;
 
 
-// ===============================
-// MAIN ANALYZE FUNCTION
-// ===============================
+// ═══════════════════════════════════════════════════════
+// ANALYZE
+// ═══════════════════════════════════════════════════════
 async function runAnalyze(optionalId) {
-    inputError.classList.add("hidden");
-    const raw = optionalId || input.value.trim();
-    
-    if (!raw) {
-        showInputError("Please paste a YouTube URL or video ID.");
-        return;
-    }
-
+    $('inputError')?.classList.add('hidden');
+    const raw = optionalId || $('videoInput')?.value.trim();
+    if (!raw) { showErr('Please paste a YouTube URL or video ID.'); return; }
     const id = extractVideoId(raw) || raw;
+    if (!id)  { showErr('Could not read a video ID — try the full YouTube URL.'); return; }
 
-    if (!id) {
-        showInputError("Could not extract a YouTube video ID. Try a full URL.");
-        return;
-    }
-    
-    resultSection.classList.add('hidden');
-    
-    // Show loading overlay
+    $('resultSection')?.classList.add('hidden');
+    $('emailGate')?.classList.remove('hidden');
+    $('flagsCard')?.classList.add('hidden');
+
     createLoadingOverlay();
-    
-    analyzeBtn.disabled = true;
-    analyzeBtn.textContent = "Analyzing...";
+    const btn = $('analyzeBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Analyzing…'; }
 
     try {
-        const response = await fetch(`${BACKEND_URL}/api/analyze`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+        const res = await fetch(`${BACKEND_URL}/api/analyze`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ videoId: id })
         });
-
-        if (!response.ok) {
-            const err = await response.json().catch(() => ({ message: "Server error" }));
-            throw new Error(err.message || "Analysis failed");
+        if (!res.ok) {
+            const e = await res.json().catch(() => ({ message: 'Server error' }));
+            throw new Error(e.message || 'Analysis failed');
         }
-
-        const data = await response.json();
-        
+        const data = await res.json();
         removeLoadingOverlay();
         renderResults(data);
-
-    } catch (error) {
+    } catch (err) {
         removeLoadingOverlay();
-        showInputError(error.message || "Failed to analyze the video. Check backend URL or server status.");
+        showErr(err.message || 'Failed to analyse. Please try again.');
     } finally {
-        analyzeBtn.disabled = false;
-        analyzeBtn.textContent = "Analyze";
+        if (btn) { btn.disabled = false; btn.textContent = 'Analyze →'; }
     }
 }
 
+function showErr(msg) {
+    const el = $('inputError');
+    if (el) { el.textContent = msg; el.classList.remove('hidden'); }
+}
 
-// ===============================
+
+// ═══════════════════════════════════════════════════════
 // RENDER RESULTS
-// ===============================
+// ═══════════════════════════════════════════════════════
 function renderResults(payload) {
-    resultSection.classList.remove("hidden");
     const { video, analysis } = payload;
     const score = Math.round(analysis.score);
+    _lastScore = score;
+    _lastTitle = video.title;
 
-    videoTitle.textContent = video.title;
-    channelInfo.textContent = `${video.channelTitle} • ${video.channelAgeYears || 0} years old`;
-    
-    const totalVotes = video.likeCount + (video.dislikeCount || 0);
-    const votesText = video.dislikeCount !== undefined 
-        ? `${video.likeCount.toLocaleString()} likes • ${video.dislikeCount.toLocaleString()} dislikes`
+    const dislikePct = (analysis.likeDislikeRatio * 100).toFixed(1);
+
+    // Show section
+    $('resultSection')?.classList.remove('hidden');
+
+    // Video meta
+    safeText('videoTitle',  video.title);
+    safeText('channelInfo', `${video.channelTitle} · ${video.channelAgeYears || 0} yrs old`);
+    const votesText = video.dislikeCount !== undefined
+        ? `${video.likeCount.toLocaleString()} likes · ${video.dislikeCount.toLocaleString()} hidden dislikes`
         : `${video.likeCount.toLocaleString()} likes`;
+    safeHTML('metaInfo', `${video.viewCount.toLocaleString()} views · ${votesText} · ${video.commentCount.toLocaleString()} comments`);
 
-    metaInfo.innerHTML =
-        `${video.viewCount.toLocaleString()} views • ${votesText} • ` +
-        `${video.commentCount.toLocaleString()} comments`;
-
-    scoreDisplay.textContent = `${score}%`;
-    scoreDisplay.className = 'score-badge';
-    if (score >= 75) {
-        scoreDisplay.classList.add('score-high');
-        scoreLabel.textContent = "Likely Legit";
-    } else if (score >= 45) {
-        scoreDisplay.classList.add('score-medium');
-        scoreLabel.textContent = "Be Careful";
-    } else {
-        scoreDisplay.classList.add('score-low');
-        scoreLabel.textContent = "High Risk";
+    // Score ring
+    const ring = $('scoreRing'), num = $('ringNum');
+    if (ring && num) {
+        num.textContent  = `${score}%`;
+        ring.className   = 'score-ring';
+        ring.classList.add(score >= 75 ? 'ring-green' : score >= 45 ? 'ring-amber' : 'ring-red');
     }
 
-    channelTrustDisplay.textContent = `${Math.round(analysis.channelTrustScore)}/100`;
-    
-    const dislikeRatioPercent = (analysis.likeDislikeRatio * 100).toFixed(1);
-    dislikeRatioDisplay.textContent = `${dislikeRatioPercent}%`;
-    dislikeRatioDisplay.classList.remove('stat-red', 'stat-yellow');
-    if (dislikeRatioPercent > 30) {
-        dislikeRatioDisplay.classList.add('stat-red');
-    } else if (dislikeRatioPercent > 15) {
-        dislikeRatioDisplay.classList.add('stat-yellow');
+    // Mini stats
+    safeText('channelTrust', `${Math.round(analysis.channelTrustScore)}/100`);
+    const drEl = $('dislikeRatio');
+    if (drEl) {
+        drEl.textContent = `${dislikePct}%`;
+        drEl.style.color = parseFloat(dislikePct) > 30 ? 'var(--red)' : parseFloat(dislikePct) > 15 ? 'var(--amber)' : 'var(--green)';
     }
+    safeText('engagement', `${(analysis.engagementRatio * 100).toFixed(3)}%`);
 
-    totalVotesDisplay.textContent = `${totalVotes.toLocaleString()} total votes`;
-    engagementRatioDisplay.textContent = `${(analysis.engagementRatio * 100).toFixed(3)}%`;
+    // Build flags list for gate
+    const sorted = [...analysis.flags].sort((a, b) =>
+        ({ red:1, yellow:2, blue:3, green:4 }[a.type]||5) - ({ red:1, yellow:2, blue:3, green:4 }[b.type]||5)
+    );
+    window._pendingFlags = sorted.map(f => ({
+        cls : f.type === 'red' ? 'fd-red' : f.type === 'yellow' ? 'fd-amber' : f.type === 'blue' ? 'fd-amber' : 'fd-green',
+        html: `<div class="flag-text">${f.text}${f.impact ? `<span style="font-size:.8rem;color:var(--muted);display:block;margin-top:.1rem;">${f.impact}</span>` : ''}</div>`
+    }));
 
-    flagsList.innerHTML = "";
-    analysis.flags.sort((a, b) => {
-        const order = { 'red': 1, 'yellow': 2, 'blue': 3, 'green': 4 };
-        return order[a.type] - order[b.type];
-    }).forEach(f => {
-        const li = document.createElement("li");
-        li.className = "flag-item";
-        
-        let flagClass = 'flag-green';
-        if(f.type === 'red') flagClass = 'flag-red';
-        else if(f.type === 'yellow') flagClass = 'flag-yellow';
-        else if(f.type === 'blue') flagClass = 'flag-blue'; 
+    // Report text for copy button
+    const verdict = score >= 75 ? 'Likely Legit' : score >= 45 ? 'Be Careful' : 'HIGH RISK 🚨';
+    _reportText = [
+        `TruthScore Analysis`,
+        `──────────────────────────────`,
+        `Title:         ${video.title}`,
+        `Channel:       ${video.channelTitle}`,
+        `TruthScore:    ${score}% — ${verdict}`,
+        `Channel Trust: ${Math.round(analysis.channelTrustScore)}/100`,
+        `Dislike Ratio: ${dislikePct}%`,
+        `Engagement:    ${(analysis.engagementRatio * 100).toFixed(3)}%`,
+        ``,
+        `Flags:`,
+        ...analysis.flags.map(f => `  • ${f.text}`)
+    ].join('\n');
+    window._reportText = _reportText;
 
-        li.innerHTML = `
-            <div class="flag-dot ${flagClass}"></div>
-            <div>
-                <div class="flag-text">${f.text}</div>
-                <div class="flag-impact">${f.impact || ""}</div>
-            </div>
-        `;
-        flagsList.appendChild(li);
-    });
+    // Reset gate
+    const gs = $('gateStatus');
+    if (gs) { gs.textContent = "No spam. We'll also notify you when the Chrome extension launches."; gs.style.color = 'var(--muted)'; }
+    const ge = $('gateEmail'); if (ge) ge.value = '';
+    $('emailGate')?.classList.remove('hidden');
+    $('flagsCard')?.classList.add('hidden');
 
-    copyReport.onclick = () => {
-        const summary = `
-TruthScore Analysis
------------------------------------
-Title: ${video.title}
-Channel: ${video.channelTitle}
-TruthScore: ${score}% (${scoreLabel.textContent})
-Channel Trust: ${Math.round(analysis.channelTrustScore)}/100
-Dislike Ratio: ${dislikeRatioPercent}%
+    // PayPal
+    injectPayPal();
 
-Flags:
-${analysis.flags.map(f => "- " + f.text).join("\n")}
-        `;
-        navigator.clipboard.writeText(summary)
-            .then(() => alert("Summary copied to clipboard!"));
+    window.scrollTo({ top: ($('resultSection')?.offsetTop || 300) - 80, behavior: 'smooth' });
+}
+
+
+// ═══════════════════════════════════════════════════════
+// EMAIL GATE
+// ═══════════════════════════════════════════════════════
+async function unlockReport() {
+    const emailEl = $('gateEmail'), statusEl = $('gateStatus');
+    const email   = emailEl?.value.trim() || '';
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        if (statusEl) { statusEl.textContent = '⚠️ Please enter a valid email address.'; statusEl.style.color = '#fca5a5'; }
+        return;
+    }
+    if (statusEl) { statusEl.textContent = 'Saving…'; statusEl.style.color = 'var(--muted)'; }
+
+    await postToSheets({ type:'unlock', email, videoTitle:_lastTitle, score:_lastScore, timestamp:new Date().toISOString() });
+
+    // Show flags
+    $('emailGate')?.classList.add('hidden');
+    const fc = $('flagsCard'), ul = $('flagsList');
+    if (fc && ul) {
+        ul.innerHTML = '';
+        (window._pendingFlags || []).forEach(f => {
+            const li = document.createElement('li');
+            li.className = 'flag-item';
+            li.innerHTML = `<div class="flag-dot ${f.cls}"></div>${f.html}`;
+            ul.appendChild(li);
+        });
+        fc.classList.remove('hidden');
+    }
+}
+window.unlockReport = unlockReport;
+
+
+// ═══════════════════════════════════════════════════════
+// ACTION BUTTONS
+// ═══════════════════════════════════════════════════════
+function shareResult() {
+    const s    = parseInt(_lastScore);
+    const risk = s >= 75 ? '✅ Looks Legit' : s >= 45 ? '⚠️ Suspicious' : '🚨 HIGH RISK';
+    const text = encodeURIComponent(
+        `Just ran "${_lastTitle}" through TruthScore — scored ${_lastScore}% ${risk}\n\nCheck any YouTube video free:\nhttps://truthscore.online`
+    );
+    window.open(`https://x.com/intent/tweet?text=${text}`, '_blank', 'width=560,height=420');
+}
+
+function copyReport() {
+    const rpt = window._reportText;
+    if (!rpt) return;
+    const btn = $('copyBtn');
+    const restore = btn ? btn.textContent : '';
+    const done = () => { if (btn) { btn.textContent = '✅ Copied!'; setTimeout(() => btn.textContent = restore, 2000); } };
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(rpt).then(done).catch(() => fallbackCopy(rpt, done));
+    } else { fallbackCopy(rpt, done); }
+}
+function fallbackCopy(text, cb) {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { document.execCommand('copy'); cb(); } catch(e) {}
+    document.body.removeChild(ta);
+}
+
+function resetTool() {
+    $('resultSection')?.classList.add('hidden');
+    $('emailGate')?.classList.remove('hidden');
+    $('flagsCard')?.classList.add('hidden');
+    const v = $('videoInput'); if (v) v.value = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+window.shareResult = shareResult;
+window.copyReport  = copyReport;
+window.resetTool   = resetTool;
+
+
+// ═══════════════════════════════════════════════════════
+// PRO MODAL
+// ═══════════════════════════════════════════════════════
+function openProModal() {
+    $('proModal')?.classList.add('open');
+    const mf = $('modalForm'), ms = $('modalSuccess');
+    if (mf) mf.style.display = '';
+    if (ms) ms.style.display = 'none';
+    const ps = $('proStatus');
+    if (ps) { ps.textContent = 'No spam. We only email you when we launch.'; ps.style.color = 'var(--muted)'; }
+}
+function closeProModal() { $('proModal')?.classList.remove('open'); }
+
+async function submitProWaitlist() {
+    const name = $('proName')?.value.trim() || '', email = $('proEmail')?.value.trim() || '';
+    const statusEl = $('proStatus');
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        if (statusEl) { statusEl.textContent = '⚠️ Please enter a valid email.'; statusEl.style.color = '#fca5a5'; }
+        return;
+    }
+    if (statusEl) { statusEl.textContent = 'Saving…'; statusEl.style.color = 'var(--muted)'; }
+    await postToSheets({ type:'pro_waitlist', name, email, timestamp:new Date().toISOString() });
+    const mf = $('modalForm'), ms = $('modalSuccess');
+    if (mf) mf.style.display = 'none';
+    if (ms) ms.style.display = 'block';
+}
+
+window.openProModal      = openProModal;
+window.closeProModal     = closeProModal;
+window.submitProWaitlist = submitProWaitlist;
+
+
+// ═══════════════════════════════════════════════════════
+// PAYPAL — injected into pro card on first result render
+// ═══════════════════════════════════════════════════════
+function injectPayPal() {
+    if (_paypalDone) return;
+
+    const proCard = document.querySelector('.pro-card');
+    if (!proCard) return;
+
+    // Create container
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'margin:.75rem 0;display:flex;justify-content:center;';
+    const container = document.createElement('div');
+    container.id = 'paypal-ts-container';
+    wrap.appendChild(container);
+
+    // Insert before .pro-sub
+    const sub = proCard.querySelector('.pro-sub');
+    proCard.insertBefore(wrap, sub || null);
+
+    // Load SDK then render
+    const script = document.createElement('script');
+    script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT}&components=hosted-buttons&disable-funding=venmo&currency=USD`;
+    script.onload = () => {
+        window.paypal?.HostedButtons?.({ hostedButtonId: PAYPAL_BTN_ID })
+              .render('#paypal-ts-container');
+        _paypalDone = true;
     };
-
-    analyzeAnother.onclick = () => {
-        resultSection.classList.add("hidden");
-        input.value = "";
-        window.scrollTo({ top: 0, behavior: "smooth" });
-    };
-
-    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    document.body.appendChild(script);
 }
