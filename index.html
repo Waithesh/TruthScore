@@ -295,7 +295,7 @@
                 <p>Drop your email to see every warning — free, no spam, unsubscribe anytime.</p>
                 <div class="gate-form">
                     <input type="email" id="gateEmail" placeholder="you@example.com" />
-                    <button class="btn-unlock" onclick="unlockReport()">Unlock Free</button>
+                    <button class="btn-unlock" id="unlockBtn" onclick="unlockReport()">Unlock Free</button>
                 </div>
                 <div id="gateStatus" class="gate-note">No spam. We'll also notify you when the Chrome extension launches.</div>
             </div>
@@ -427,7 +427,7 @@
             <div class="modal-form">
                 <input type="text"  id="proName"  placeholder="Your first name" />
                 <input type="email" id="proEmail" placeholder="your@email.com" />
-                <button class="btn-pro" onclick="submitProWaitlist()">Secure My Spot — Free</button>
+                <button class="btn-pro" id="proSubmitBtn" onclick="submitProWaitlist()">Secure My Spot — Free</button>
             </div>
             <div id="proStatus" class="modal-note">No spam. We only email you when we launch.</div>
         </div>
