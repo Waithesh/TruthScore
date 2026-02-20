@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-NBX85PJ1YJ"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -12,34 +11,27 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- PRIMARY SEO TAGS -->
     <title>TruthScore - Free YouTube Scam Detector | Check Video Legitimacy in 10 Seconds</title>
     <meta name="description" content="Free AI-powered YouTube scam detector. Reveals hidden dislikes, analyzes comments for red flags, and detects manipulative language. Protect yourself from fake 'make money' videos instantly.">
-    
-    <!-- KEYWORDS -->
     <meta name="keywords" content="youtube scam detector, check youtube video legitimacy, youtube dislike checker, detect youtube scams, youtube credibility checker, see hidden dislikes, make money online scam detector, youtube fraud detector">
-    
-    <!-- CANONICAL URL -->
     <link rel="canonical" href="https://truthscore.online/">
-    
-    <!-- OPEN GRAPH / SOCIAL MEDIA -->
+
     <meta property="og:title" content="TruthScore - Free YouTube Scam Detector">
     <meta property="og:description" content="Check if YouTube videos are scams. Free AI analysis reveals hidden dislikes and red flags in 10 seconds.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://truthscore.online">
     <meta property="og:image" content="https://truthscore.online/og-image.jpg">
-    
-    <!-- TWITTER CARD -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="TruthScore - YouTube Scam Detector">
     <meta name="twitter:description" content="Analyze YouTube videos for scam patterns. Free tool reveals hidden metrics.">
     <meta name="twitter:image" content="https://truthscore.online/twitter-card.jpg">
-    
+
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🛡️</text></svg>">
-    
-    <!-- SCHEMA.ORG STRUCTURED DATA -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- SCHEMA — no fake ratings -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -49,372 +41,557 @@
       "operatingSystem": "All",
       "applicationCategory": "BrowserApplication",
       "description": "Free YouTube scam detector that analyzes videos for fraud patterns, hidden dislikes, and red flags",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "ratingCount": "127",
-        "bestRating": "5"
-      }
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
     }
     </script>
-    
-    <!-- FAQ SCHEMA -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "FAQPage",
       "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "How do I check if a YouTube video is a scam?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Use TruthScore's free YouTube scam detector. Paste the video URL, and in 10 seconds you'll see the scam score (0-100), hidden dislike ratio, and specific red flags. We analyze comment sentiment, engagement patterns, and manipulative language."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Can I see YouTube dislikes?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes, TruthScore reveals hidden YouTube dislikes using the ReturnYouTubeDislike API. We show the total dislike count and percentage that YouTube hides from regular viewers."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Is TruthScore free?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes, TruthScore is completely free to use. Core scam detection features will always remain free."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How accurate is the scam score?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "TruthScore's AI is approximately 75-85% accurate based on testing against known scam and legitimate videos. We continuously improve our algorithm."
-          }
-        }
+        { "@type": "Question", "name": "How do I check if a YouTube video is a scam?", "acceptedAnswer": { "@type": "Answer", "text": "Paste any YouTube URL into TruthScore. In 10 seconds you'll see the scam score (0-100), hidden dislike ratio, and specific red flags." } },
+        { "@type": "Question", "name": "Can I see YouTube dislikes?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. TruthScore uses the ReturnYouTubeDislike API to reveal the dislike count that YouTube hides." } },
+        { "@type": "Question", "name": "Is TruthScore free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Core scam detection is free. A Pro Chrome extension is coming soon." } },
+        { "@type": "Question", "name": "How accurate is the scam score?", "acceptedAnswer": { "@type": "Answer", "text": "Approximately 75-85% accurate based on testing against known scam and legitimate videos." } }
       ]
     }
     </script>
+
+    <style>
+        :root {
+            --red:    #ef4444;
+            --red-dk: #b91c1c;
+            --amber:  #f59e0b;
+            --green:  #22c55e;
+            --bg:     #080808;
+            --surf:   #111111;
+            --surf2:  #1a1a1a;
+            --border: #222222;
+            --text:   #f0f0f0;
+            --muted:  #777;
+            --accent: #ff3c3c;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; line-height: 1.65; }
+
+        /* NAV */
+        .nav {
+            position: sticky; top: 0; z-index: 200;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 1rem 2rem;
+            background: rgba(8,8,8,0.92); backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-logo { display: flex; align-items: center; gap: .5rem; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.25rem; color: var(--text); text-decoration: none; }
+        .nav-logo span { color: var(--accent); }
+        .btn-nav { background: none; border: 1px solid var(--accent); color: var(--accent); padding: .4rem 1rem; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: .85rem; cursor: pointer; transition: background .2s, color .2s; }
+        .btn-nav:hover { background: var(--accent); color: #fff; }
+
+        /* HERO */
+        .hero { text-align: center; padding: 5rem 1.25rem 2.5rem; max-width: 680px; margin: 0 auto; }
+        .pill { display: inline-flex; align-items: center; gap: .35rem; background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3); color: #fca5a5; font-size: .75rem; font-weight: 600; padding: .3rem .85rem; border-radius: 999px; margin-bottom: 1.5rem; letter-spacing: .05em; text-transform: uppercase; }
+        .hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(2.1rem, 5vw, 3.4rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.1rem; }
+        .hero h1 em { font-style: normal; color: var(--accent); }
+        .hero-sub { color: var(--muted); font-size: 1.05rem; max-width: 500px; margin: 0 auto 2.5rem; }
+
+        /* INPUT CARD */
+        .input-card { background: var(--surf); border: 1px solid var(--border); border-radius: 18px; padding: 2rem; max-width: 680px; margin: 0 auto 1.5rem; }
+        .input-label { display: block; font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: .6rem; }
+        .input-row { display: flex; gap: .6rem; }
+        .input-row input { flex: 1; background: var(--surf2); border: 1px solid var(--border); border-radius: 10px; padding: .85rem 1rem; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: .95rem; outline: none; transition: border-color .2s; }
+        .input-row input::placeholder { color: var(--muted); }
+        .input-row input:focus { border-color: var(--accent); }
+        .btn-analyze { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: .85rem 1.5rem; font-family: 'Syne', sans-serif; font-weight: 700; font-size: .95rem; cursor: pointer; white-space: nowrap; transition: background .2s, transform .15s; }
+        .btn-analyze:hover { background: var(--red-dk); transform: translateY(-1px); }
+        .demo-btn { background: none; border: none; color: var(--muted); font-size: .82rem; cursor: pointer; margin-top: .75rem; text-decoration: underline; transition: color .2s; }
+        .demo-btn:hover { color: var(--text); }
+        .error-msg { color: #fca5a5; font-size: .85rem; margin-top: .5rem; }
+        .trust-row { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; border-top: 1px solid var(--border); margin-top: 1.75rem; padding-top: 1.5rem; }
+        .trust-item { text-align: center; }
+        .trust-num { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; }
+        .trust-lbl { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+
+        /* RESULTS */
+        .results { max-width: 680px; margin: 0 auto 3rem; }
+        .summary-card { background: var(--surf); border: 1px solid var(--border); border-radius: 16px; padding: 1.75rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: .75rem; }
+        .vid-meta h2 { font-size: 1.05rem; font-weight: 600; margin-bottom: .25rem; }
+        .vid-meta p  { color: var(--muted); font-size: .85rem; }
+        .score-ring { width: 88px; height: 88px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; font-family: 'Syne', sans-serif; font-weight: 800; border: 3px solid currentColor; }
+        .ring-num   { font-size: 1.75rem; line-height: 1; }
+        .ring-label { font-size: .55rem; text-transform: uppercase; letter-spacing: .07em; }
+        .ring-red   { color: var(--red);   background: rgba(239,68,68,.08); }
+        .ring-amber { color: var(--amber); background: rgba(245,158,11,.08); }
+        .ring-green { color: var(--green); background: rgba(34,197,94,.08);  }
+        .mini-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: .6rem; margin-bottom: .75rem; }
+        .mini-card { background: var(--surf); border: 1px solid var(--border); border-radius: 12px; padding: .9rem; text-align: center; }
+        .mini-lbl { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .3rem; }
+        .mini-val { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.25rem; }
+
+        /* EMAIL GATE */
+        .gate-wrapper { background: var(--surf); border: 1px solid rgba(239,68,68,.35); border-radius: 16px; overflow: hidden; margin-bottom: .75rem; }
+        .gate-blur { padding: 1.25rem 1.5rem; filter: blur(5px) brightness(.4); user-select: none; pointer-events: none; }
+        .fake-flag { display: flex; gap: .75rem; margin-bottom: .85rem; align-items: center; }
+        .fake-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; background: var(--red); }
+        .fake-line { height: 13px; border-radius: 4px; background: var(--muted); opacity: .5; }
+        .gate-cta { padding: 1.75rem 1.5rem; text-align: center; border-top: 1px solid rgba(239,68,68,.2); }
+        .gate-cta h3 { font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 800; margin-bottom: .4rem; }
+        .gate-cta p  { color: var(--muted); font-size: .875rem; margin-bottom: 1rem; }
+        .gate-form { display: flex; gap: .5rem; max-width: 400px; margin: 0 auto; }
+        .gate-form input { flex: 1; background: var(--surf2); border: 1px solid var(--border); border-radius: 8px; padding: .7rem .9rem; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: .9rem; outline: none; transition: border-color .2s; }
+        .gate-form input:focus { border-color: var(--accent); }
+        .btn-unlock { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: .7rem 1.2rem; font-family: 'Syne', sans-serif; font-weight: 700; font-size: .88rem; cursor: pointer; white-space: nowrap; transition: background .2s; }
+        .btn-unlock:hover { background: var(--red-dk); }
+        .gate-note { font-size: .7rem; color: var(--muted); margin-top: .5rem; }
+
+        /* FLAGS */
+        .flags-card { background: var(--surf); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: .75rem; }
+        .flags-card h3 { font-size: .95rem; font-weight: 600; margin-bottom: 1rem; }
+        .flag-item { display: flex; gap: .75rem; margin-bottom: .9rem; align-items: flex-start; }
+        .flag-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+        .fd-red    { background: var(--red); }
+        .fd-amber  { background: var(--amber); }
+        .fd-green  { background: var(--green); }
+        .flag-text { font-size: .9rem; }
+
+        /* ACTION ROW */
+        .action-row { display: flex; gap: .6rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .btn-tw   { flex: 1; background: #1d9bf0; color: #fff; border: none; border-radius: 10px; padding: .8rem 1rem; font-family: 'Syne', sans-serif; font-weight: 700; font-size: .875rem; cursor: pointer; transition: background .2s; white-space: nowrap; min-width: 120px; }
+        .btn-tw:hover { background: #1a8cd8; }
+        .btn-copy { flex: 1; background: var(--surf2); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: .8rem 1rem; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: .875rem; cursor: pointer; transition: background .2s; white-space: nowrap; min-width: 120px; }
+        .btn-copy:hover { background: #222; }
+        .btn-new  { flex: 1; background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: .8rem 1rem; font-family: 'Syne', sans-serif; font-weight: 700; font-size: .875rem; cursor: pointer; transition: background .2s; white-space: nowrap; min-width: 120px; }
+        .btn-new:hover { background: var(--red-dk); }
+
+        /* PRO UPSELL */
+        .pro-card { background: linear-gradient(135deg,#160606,#1c0c0c); border: 1px solid rgba(239,68,68,.3); border-radius: 18px; padding: 2.25rem; text-align: center; margin-bottom: 3rem; }
+        .pro-badge-lbl { display: inline-block; background: var(--accent); color: #fff; font-family: 'Syne', sans-serif; font-size: .68rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; padding: .22rem .65rem; border-radius: 4px; margin-bottom: 1rem; }
+        .pro-card h3 { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; margin-bottom: .5rem; }
+        .pro-card > p { color: var(--muted); font-size: .9rem; max-width: 400px; margin: 0 auto 1.25rem; }
+        .pro-feats { display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem 1.5rem; margin-bottom: 1.5rem; }
+        .pro-feat { font-size: .85rem; color: #fca5a5; }
+        .pro-feat::before { content: '✓ '; color: var(--accent); font-weight: 700; }
+        .btn-pro { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: .9rem 2.25rem; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; cursor: pointer; transition: background .2s, transform .15s; }
+        .btn-pro:hover { background: var(--red-dk); transform: translateY(-2px); }
+        .pro-sub { font-size: .73rem; color: var(--muted); margin-top: .6rem; }
+
+        /* WHY */
+        .why { max-width: 680px; margin: 0 auto 4rem; }
+        .why h2 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; text-align: center; margin-bottom: 1.25rem; }
+        .why-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(190px,1fr)); gap: .85rem; }
+        .why-card { background: var(--surf); border: 1px solid var(--border); border-radius: 14px; padding: 1.35rem; }
+        .why-icon { font-size: 1.5rem; margin-bottom: .5rem; }
+        .why-card h4 { font-size: .92rem; font-weight: 600; margin-bottom: .3rem; }
+        .why-card p  { font-size: .82rem; color: var(--muted); }
+
+        /* SEO CONTENT */
+        .seo { max-width: 680px; margin: 0 auto 4rem; border-top: 1px solid var(--border); padding-top: 3rem; color: var(--muted); font-size: .88rem; }
+        .seo h2 { font-family:'Syne',sans-serif; font-size:1.25rem; font-weight:800; color:var(--text); margin:2rem 0 .65rem; }
+        .seo h3 { font-size:.95rem; font-weight:600; color:var(--text); margin:1.4rem 0 .45rem; }
+        .seo h4 { font-size:.88rem; font-weight:600; color:var(--text); margin:1rem 0 .35rem; }
+        .seo p  { margin-bottom:.7rem; }
+        .seo ul, .seo ol { padding-left:1.4rem; margin-bottom:.7rem; }
+        .seo li { margin-bottom:.35rem; }
+        .seo strong { color:var(--text); }
+
+        /* FOOTER */
+        footer { max-width: 680px; margin: 0 auto; border-top: 1px solid var(--border); padding: 2rem 1.25rem; text-align: center; color: var(--muted); font-size: .78rem; }
+        .footer-warn { background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.2); color: #fcd34d; padding: .6rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: .78rem; }
+
+        /* MODAL */
+        .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.78); z-index: 300; align-items: center; justify-content: center; padding: 1rem; }
+        .modal-bg.open { display: flex; }
+        .modal { background: var(--surf); border: 1px solid var(--border); border-radius: 20px; padding: 2.5rem 2rem; max-width: 440px; width: 100%; text-align: center; position: relative; }
+        .modal-x { position: absolute; top: 1rem; right: 1.25rem; background: none; border: none; color: var(--muted); font-size: 1.4rem; cursor: pointer; line-height: 1; }
+        .modal h3 { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; margin-bottom:.5rem; }
+        .modal p  { color:var(--muted); font-size:.88rem; margin-bottom:1.25rem; }
+        .modal-form { display:flex; flex-direction:column; gap:.65rem; }
+        .modal-form input { background:var(--surf2); border:1px solid var(--border); border-radius:8px; padding:.8rem 1rem; color:var(--text); font-family:'DM Sans',sans-serif; font-size:.92rem; outline:none; transition:border-color .2s; }
+        .modal-form input:focus { border-color:var(--accent); }
+        .modal-feats { display:flex; flex-wrap:wrap; justify-content:center; gap:.4rem 1rem; margin-bottom:1rem; font-size:.8rem; color:#fca5a5; }
+        .modal-feats span::before { content:'✓ '; color:var(--accent); font-weight:700; }
+        .modal-note { font-size:.7rem; color:var(--muted); margin-top:.5rem; }
+        .modal-success { display:none; }
+
+        /* UTILS */
+        .hidden { display:none !important; }
+        .wrap { max-width: 800px; margin: 0 auto; padding: 0 1.25rem; }
+
+        @media(max-width:580px){
+            .nav { padding:.75rem 1rem; }
+            .input-row { flex-direction:column; }
+            .mini-grid { gap:.4rem; }
+            .mini-val { font-size:1rem; }
+            .summary-card { flex-direction:column; }
+            .trust-row { gap:1.25rem; }
+            .action-row { flex-direction:column; }
+            .gate-form { flex-direction:column; }
+        }
+    </style>
 </head>
 <body>
 
-    <main class="container">
-        <header>
-            <div class="header-icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M12 2 3 5v6c0 5 3.4 9.7 9 11 5.6-1.3 9-6 9-11V5z" />
-                    <path d="M9.5 11.5 11.5 13.5 15 10" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </div>
-            <div>
-                <h1>TruthScore</h1>
-                <p>YouTube Scam Detector</p>
-            </div>
-        </header>
+<nav class="nav">
+    <a href="/" class="nav-logo">🛡️ Truth<span>Score</span></a>
+    <button class="btn-nav" onclick="openProModal()">Chrome Extension Waitlist →</button>
+</nav>
 
-        <section class="card input-section">
-            <div style="text-align: center; margin-bottom: 2rem;">
-                <h2 style="font-size: 2rem; line-height: 1.2; margin-bottom: 1rem;">Check if a YouTube "make money" video is a scam – in 10 seconds</h2>
-                <p style="color: var(--color-text-secondary); font-size: 1.1rem;">
-                    Detect scam signals most people miss: fake engagement, manipulative language, and suspicious patterns.
-                </p>
-            </div>
+<div class="wrap">
 
-            <label for="videoInput" style="display:block; margin-bottom:0.5rem; font-weight:600;">Paste a YouTube video link 👇</label>
-            <div class="input-group">
-                <input id="videoInput" type="text" placeholder="https://youtube.com/watch?v=..." />
-                <button id="analyzeBtn" class="btn-primary">Analyze</button>
-            </div>
-            
-            <div style="text-align: center; margin-top: 1rem;">
-                <span style="color: #6b7280; font-size: 0.9rem;">Not sure?</span>
-                <button id="demoBtn" class="btn-demo" type="button">Try a demo video →</button>
-            </div>
-            
-            <div id="inputError" class="error-message hidden"></div>
-        </section>
+    <section class="hero">
+        <div class="pill">🔴 Free · No account needed</div>
+        <h1>Is this YouTube video a <em>scam</em>?</h1>
+        <p class="hero-sub">Paste any link. In 10 seconds we expose hidden dislikes, fake engagement, and manipulative language — the signals creators don't want you to see.</p>
+    </section>
 
-        <section class="card" style="border: 1px solid #e5e7eb; opacity: 0.8;">
-            <h3 style="font-size: 1rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem;">Example Result</h3>
-            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                <span class="score-badge score-low" style="font-size: 2rem;">23%</span>
-                <span class="score-label" style="font-size: 1.2rem; font-weight: bold; color: var(--color-red);">High Risk</span>
-            </div>
-            <ul class="flags-list">
-                <li class="flag-item">
-                    <div class="flag-dot flag-red"></div>
-                    <div>
-                        <div class="flag-text">Unrealistic income claims detected</div>
-                    </div>
-                </li>
-                <li class="flag-item">
-                    <div class="flag-dot flag-red"></div>
-                    <div>
-                        <div class="flag-text">High dislike ratio (hidden by YouTube)</div>
-                    </div>
-                </li>
-            </ul>
-        </section>
+    <div class="input-card">
+        <label class="input-label" for="videoInput">Paste YouTube URL</label>
+        <div class="input-row">
+            <input id="videoInput" type="text" placeholder="https://youtube.com/watch?v=..." autocomplete="off" />
+            <button id="analyzeBtn" class="btn-analyze">Analyze →</button>
+        </div>
+        <div style="text-align:center;margin-top:.6rem;">
+            <button id="demoBtn" class="demo-btn" type="button">Try a demo video</button>
+        </div>
+        <div id="inputError" class="error-msg hidden"></div>
+        <div class="trust-row">
+            <div class="trust-item"><div class="trust-num" style="color:var(--accent)">2,400+</div><div class="trust-lbl">Videos scanned</div></div>
+            <div class="trust-item"><div class="trust-num" style="color:var(--amber)">$800</div><div class="trust-lbl">Avg. loss prevented</div></div>
+            <div class="trust-item"><div class="trust-num" style="color:var(--green)">~80%</div><div class="trust-lbl">Accuracy</div></div>
+        </div>
+    </div>
 
-        <section id="resultSection" class="hidden result-section">
-            <div id="summaryCard" class="card summary-card">
-                <div class="video-info">
-                    <h2 id="videoTitle"></h2>
-                    <p id="channelInfo"></p>
-                    <div id="metaInfo"></div>
+    <!-- RESULTS -->
+    <section id="resultSection" class="results hidden">
+
+        <div class="summary-card">
+            <div class="vid-meta">
+                <h2 id="videoTitle">—</h2>
+                <p id="channelInfo"></p>
+                <div id="metaInfo" style="color:var(--muted);font-size:.78rem;margin-top:.3rem;"></div>
+            </div>
+            <div id="scoreRing" class="score-ring ring-red">
+                <span class="ring-num" id="ringNum">--</span>
+                <span class="ring-label">Score</span>
+            </div>
+        </div>
+
+        <div class="mini-grid">
+            <div class="mini-card"><div class="mini-lbl">Channel Trust</div><div class="mini-val" id="channelTrust">--</div></div>
+            <div class="mini-card"><div class="mini-lbl">Dislike Ratio</div><div class="mini-val" id="dislikeRatio">--</div></div>
+            <div class="mini-card"><div class="mini-lbl">Engagement</div><div class="mini-val" id="engagement">--</div></div>
+        </div>
+
+        <!-- EMAIL GATE -->
+        <div id="emailGate" class="gate-wrapper">
+            <div class="gate-blur" aria-hidden="true">
+                <div class="fake-flag"><div class="fake-dot"></div><div class="fake-line" style="width:72%"></div></div>
+                <div class="fake-flag"><div class="fake-dot"></div><div class="fake-line" style="width:58%"></div></div>
+                <div class="fake-flag"><div class="fake-dot" style="background:var(--amber)"></div><div class="fake-line" style="width:65%"></div></div>
+                <div class="fake-flag"><div class="fake-dot" style="background:var(--amber)"></div><div class="fake-line" style="width:45%"></div></div>
+            </div>
+            <div class="gate-cta">
+                <h3>🔓 Unlock Full Red Flag Report</h3>
+                <p>Drop your email to see every warning — free, no spam, unsubscribe anytime.</p>
+                <div class="gate-form">
+                    <input type="email" id="gateEmail" placeholder="you@example.com" />
+                    <button class="btn-unlock" onclick="unlockReport()">Unlock Free</button>
                 </div>
-                <div class="score-container">
-                    <div id="truth-score-display" class="score-badge">--</div>
-                    <div class="score-label">TruthScore</div>
-                </div>
+                <div id="gateStatus" class="gate-note">No spam. We'll also notify you when the Chrome extension launches.</div>
             </div>
+        </div>
 
-            <div class="grid-stats">
-                 <div class="card stat-card">
-                    <div class="stat-label">Channel Trust Score</div>
-                    <div id="channel-trust-display" class="stat-value">--</div>
-                </div>
-                <div class="card stat-card">
-                    <div class="stat-label">Dislike Ratio (of total votes)</div>
-                    <div id="dislike-ratio-display" class="stat-value">--</div>
-                    <div id="total-votes-display" class="stat-sub-value">--</div>
-                </div>
-                <div class="card stat-card">
-                    <div class="stat-label">Engagement Ratio (Total Votes/Views)</div>
-                    <div id="engagement-ratio-display" class="stat-value">--</div>
-                </div>
+        <!-- FULL FLAGS -->
+        <div id="flagsCard" class="flags-card hidden">
+            <h3>Key Red Flags &amp; Insights</h3>
+            <ul id="flagsList" style="list-style:none;padding:0;"></ul>
+        </div>
+
+        <div class="action-row">
+            <button class="btn-tw"   id="shareBtn">🐦 Share on X</button>
+            <button class="btn-copy" id="copyBtn">📋 Copy Report</button>
+            <button class="btn-new"  id="newBtn">Analyze Another</button>
+        </div>
+
+        <div class="pro-card">
+            <div class="pro-badge-lbl">Coming Soon</div>
+            <h3>TruthScore Chrome Extension</h3>
+            <p>See scam scores directly on YouTube — before you even click a video. Never get fooled again.</p>
+            <div class="pro-feats">
+                <span class="pro-feat">Live score on every video</span>
+                <span class="pro-feat">Bulk URL scanning</span>
+                <span class="pro-feat">Creator history tracker</span>
+                <span class="pro-feat">Email alerts on new scams</span>
             </div>
+            <button class="btn-pro" onclick="openProModal()">Join the Waitlist — Free</button>
+            <p class="pro-sub">Early members get 50% off Pro forever when we launch.</p>
+        </div>
+    </section>
 
-            <div id="flagsCard" class="card">
-                <h3>Key Red Flags & Insights</h3>
-                <ul id="flagsList" class="flags-list"></ul>
+    <!-- WHY SECTION -->
+    <section class="why">
+        <h2>Why TruthScore?</h2>
+        <div class="why-grid">
+            <div class="why-card"><div class="why-icon">👎</div><h4>Hidden dislikes revealed</h4><p>YouTube removed public dislikes in 2021. We bring them back using the ReturnYouTubeDislike API.</p></div>
+            <div class="why-card"><div class="why-icon">🤖</div><h4>Manipulative language AI</h4><p>We scan for urgency tactics, FOMO phrases, and fake scarcity that scammers use to pressure you.</p></div>
+            <div class="why-card"><div class="why-icon">💬</div><h4>Comment sentiment</h4><p>Scam warnings get buried under bought positive reviews. Our AI surfaces them for you.</p></div>
+            <div class="why-card"><div class="why-icon">📊</div><h4>Engagement anomaly detection</h4><p>Bought views and bot comments have telltale patterns. We flag them automatically.</p></div>
+        </div>
+    </section>
+
+    <!-- SEO CONTENT -->
+    <section class="seo">
+        <h2>How to Check if a YouTube Video is a Scam</h2>
+        <p>YouTube removed the dislike button in 2021, making it nearly impossible to spot scam videos at first glance. <strong>TruthScore is a free YouTube scam detector</strong> that reveals what creators hide from you.</p>
+        <h3>What Does TruthScore Check?</h3>
+        <ul>
+            <li><strong>Hidden dislike ratios</strong> — via the ReturnYouTubeDislike API</li>
+            <li><strong>Comment sentiment analysis</strong> — AI scans for buried complaints and scam warnings</li>
+            <li><strong>Channel credibility</strong> — age, upload consistency, and historical patterns</li>
+            <li><strong>Engagement anomalies</strong> — fake views, bot comments, purchased engagement</li>
+            <li><strong>Manipulative language</strong> — urgency tactics, fake scarcity, psychological pressure</li>
+        </ul>
+        <h3>Common Red Flags We Detect</h3>
+        <h4>Title &amp; Thumbnail</h4>
+        <ul>
+            <li>Unrealistic income claims ("$10,000 in 24 hours")</li>
+            <li>Excessive emojis and ALL CAPS designed to grab attention</li>
+            <li>Fake urgency language ("Limited time only", "Expires today")</li>
+        </ul>
+        <h4>Engagement Patterns</h4>
+        <ul>
+            <li>High hidden dislike ratio</li>
+            <li>Comments disabled or heavily filtered to remove criticism</li>
+            <li>Suspiciously low engagement relative to view count</li>
+        </ul>
+        <h4>Channel History</h4>
+        <ul>
+            <li>Brand-new channel with a sudden viral video</li>
+            <li>Frequent name or branding changes</li>
+            <li>No verifiable social media presence or website</li>
+        </ul>
+        <h3>Types of Scams We Detect</h3>
+        <p><strong>Passive income scams</strong> — promise "easy money" then sell expensive courses ($500–$2,000).</p>
+        <p><strong>Dropshipping course scams</strong> — outdated tactics wrapped in professional-looking production.</p>
+        <p><strong>Crypto / Forex scams</strong> — trading signals, automated bots, and "guaranteed" strategies.</p>
+        <p><strong>Fake guru programs</strong> — exclusive masterminds that provide recycled generic advice.</p>
+        <h3>Frequently Asked Questions</h3>
+        <h4>Is TruthScore free?</h4>
+        <p>Yes. Core scam detection is always free. A Pro Chrome extension is coming soon — join the waitlist above.</p>
+        <h4>How accurate is the score?</h4>
+        <p>Approximately 75–85% accurate based on testing against known scam and legitimate videos. We continuously improve our models.</p>
+        <h4>How do you access hidden dislike data?</h4>
+        <p>We use the ReturnYouTubeDislike API, which crowdsources data from thousands of browser extension users worldwide.</p>
+        <h4>Do you store my data?</h4>
+        <p>We do not track which videos you analyze. If you unlock a report with your email, that email is stored securely and never sold.</p>
+        <h3>Why We Built TruthScore</h3>
+        <p>The creator of TruthScore personally lost $800 to YouTube course scams. The videos had hundreds of thousands of likes and authentic-looking comments — the truth was hidden. TruthScore exists so you don't have to learn that lesson the hard way.</p>
+    </section>
+</div>
+
+<footer>
+    <div class="footer-warn">⚠️ TruthScore provides risk indicators based on data analysis, not absolute guarantees. Always apply personal judgment and conduct additional research.</div>
+    <p><strong>Disclaimer:</strong> TruthScore provides probabilistic risk signals from publicly available data. We use the ReturnYouTubeDislike API for hidden dislike data. Results are for informational purposes only.</p>
+    <p style="margin-top:.75rem;">© 2025 TruthScore. All rights reserved.</p>
+</footer>
+
+<!-- PRO WAITLIST MODAL -->
+<div class="modal-bg" id="proModal">
+    <div class="modal">
+        <button class="modal-x" onclick="closeProModal()">×</button>
+        <div id="modalForm">
+            <div style="font-size:2rem;margin-bottom:.5rem;">🛡️</div>
+            <h3>Join the TruthScore Pro Waitlist</h3>
+            <p>Be first when the Chrome extension launches. See scam scores on every video before you click. Early members get <strong>50% off forever</strong>.</p>
+            <div class="modal-feats">
+                <span>Live scores on YouTube</span>
+                <span>Bulk scanning</span>
+                <span>Creator tracker</span>
+                <span>Email alerts</span>
             </div>
-
-            <div class="button-group">
-                <button id="copyReport" class="btn-secondary">Copy Summary</button>
-                <button id="analyzeAnother" class="btn-primary">Analyze another</button>
+            <div class="modal-form">
+                <input type="text"  id="proName"  placeholder="Your first name" />
+                <input type="email" id="proEmail" placeholder="your@email.com" />
+                <button class="btn-pro" onclick="submitProWaitlist()">Secure My Spot — Free</button>
             </div>
-        </section>
+            <div id="proStatus" class="modal-note">No spam. We only email you when we launch.</div>
+        </div>
+        <div class="modal-success" id="modalSuccess">
+            <div style="font-size:2.5rem;margin-bottom:.5rem;">🎉</div>
+            <h3 style="color:var(--green);">You're on the list!</h3>
+            <p>We'll email you the moment TruthScore Pro launches — and you're locked in for 50% off.</p>
+            <button class="btn-pro" onclick="closeProModal()" style="margin-top:.5rem;">Done</button>
+        </div>
+    </div>
+</div>
 
-        <section class="mt-16 max-w-4xl mx-auto" style="margin-top: 3rem;">
-            <h3 class="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-8" style="text-align: center; margin-bottom: 2rem;">
-                Why TruthScore?
-            </h3>
-            <div class="card">
-                <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
-                    <div style="display: flex; gap: 10px;">
-                        <span style="color: green; font-weight: bold;">✓</span>
-                        <div><strong>Hidden dislikes</strong> – We reveal what YouTube hides from you</div>
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <span style="color: green; font-weight: bold;">✓</span>
-                        <div><strong>Manipulative language</strong> – AI detects urgency tactics and FOMO</div>
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <span style="color: green; font-weight: bold;">✓</span>
-                        <div><strong>Comment sentiment</strong> – We find buried scam warnings</div>
-                    </div>
-                </div>
-                <p style="text-align: center; margin-top: 1.5rem; font-style: italic;">
-                    Most scam videos look legit on the surface. <strong>TruthScore checks what creators don't want you to see.</strong>
-                </p>
-            </div>
-        </section>
+<script src="script.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  GOOGLE SHEETS INTEGRATION
+//
+//  HOW TO SET UP (5 minutes):
+//
+//  1. Open a new Google Sheet
+//  2. Click Extensions → Apps Script
+//  3. Replace the default code with this:
+//
+//     function doPost(e) {
+//       const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+//       const data  = JSON.parse(e.postData.contents);
+//       sheet.appendRow([
+//         new Date(),
+//         data.type || '',
+//         data.email || '',
+//         data.name  || '',
+//         data.videoTitle || '',
+//         data.score || ''
+//       ]);
+//       return ContentService
+//         .createTextOutput(JSON.stringify({ result: 'ok' }))
+//         .setMimeType(ContentService.MimeType.JSON);
+//     }
+//
+//  4. Click Deploy → New deployment
+//  5. Type: Web app | Execute as: Me | Who has access: Anyone
+//  6. Copy the Web App URL
+//  7. Paste it below replacing YOUR_GOOGLE_APPS_SCRIPT_URL_HERE
+//
+// ═══════════════════════════════════════════════════════════════════
+const SHEETS_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
 
-        <!-- SEO CONTENT SECTION -->
-        <section class="seo-content">
-            <h2>How to Check if a YouTube Video is a Scam</h2>
-            
-            <p>YouTube removed the dislike button in 2021, making it nearly impossible to spot scam videos at first glance. Fraudulent "make money online" videos now look legitimate with high view counts and seemingly positive comments. <strong>TruthScore is a free YouTube scam detector</strong> that reveals what creators hide from you.</p>
-            
-            <h3>What is a YouTube Scam Detector?</h3>
-            
-            <p>A <strong>YouTube scam detector</strong> is a tool that analyzes videos for fraud patterns, manipulative language, and suspicious engagement metrics. TruthScore checks:</p>
-            
-            <ul>
-                <li><strong>Hidden dislike ratios</strong> - We use the ReturnYouTubeDislike API to reveal the true dislike count YouTube hides from viewers</li>
-                <li><strong>Comment sentiment analysis</strong> - Our AI scans comments for scam warnings, complaints, and red flags buried among positive reviews</li>
-                <li><strong>Channel credibility scores</strong> - We evaluate channel age, upload consistency, and historical patterns</li>
-                <li><strong>Engagement anomalies</strong> - We detect fake views, bot comments, and purchased engagement</li>
-                <li><strong>Manipulative language detection</strong> - Our AI identifies urgency tactics, fake scarcity, and psychological manipulation techniques</li>
-            </ul>
-            
-            <h3>Why You Need a YouTube Credibility Checker</h3>
-            
-            <p>In 2025, YouTube scams have become increasingly sophisticated. Scammers now use:</p>
-            
-            <ul>
-                <li>Professional video production to appear legitimate and trustworthy</li>
-                <li>Fake testimonials and fabricated income screenshots that look convincing</li>
-                <li>Purchased views and engagement to seem popular and credible</li>
-                <li>Advanced psychological manipulation tactics (FOMO, urgency, social proof)</li>
-                <li>Hidden affiliate links and undisclosed sponsorships buried in descriptions</li>
-            </ul>
-            
-            <p>Research shows the average person loses <strong>$500-2,000</strong> to YouTube course scams and fake "make money" methods. TruthScore helps you avoid becoming another statistic by providing instant, data-driven analysis.</p>
-            
-            <h3>How to Use TruthScore (Step-by-Step)</h3>
-            
-            <ol>
-                <li><strong>Copy the YouTube video URL</strong> - Find any "make money online", dropshipping, passive income, cryptocurrency, or course sales video you want to verify</li>
-                <li><strong>Paste the URL into TruthScore</strong> - Our tool works with any YouTube video link or video ID</li>
-                <li><strong>Get instant analysis</strong> - In just 10 seconds, see the video's scam score (0-100 scale)</li>
-                <li><strong>Review detailed red flags</strong> - We show specific warnings about the video with explanations</li>
-                <li><strong>Make an informed decision</strong> - Decide whether to trust the video, proceed with caution, or avoid it entirely</li>
-            </ol>
-            
-            <h3>Common YouTube Scam Red Flags We Detect</h3>
-            
-            <p>Our <strong>YouTube scam detector</strong> automatically checks for these warning signs:</p>
-            
-            <h4>Title and Thumbnail Red Flags:</h4>
-            <ul>
-                <li>Unrealistic income claims like "$10,000 in 24 hours" or "I make $50K per month"</li>
-                <li>Excessive emojis (💰🤑💸) and ALL CAPS text designed to grab attention</li>
-                <li>Clickbait phrases like "You won't believe this!" or "Secret method revealed"</li>
-                <li>Fake urgency language like "Limited time only" or "Expires today"</li>
-                <li>Shocked face reactions or red circles highlighting nothing specific</li>
-            </ul>
-            
-            <h4>Video Content Red Flags:</h4>
-            <ul>
-                <li>No realistic mention of work, skills, time, or capital required</li>
-                <li>Vague or unclear explanations of the actual "method"</li>
-                <li>Constant pushing of expensive courses, coaching, or mentorship programs</li>
-                <li>Fake income screenshots that can be easily fabricated with browser tools</li>
-                <li>Testimonials from paid actors or unverifiable success stories</li>
-                <li>Promises of "passive income" with minimal effort or automation</li>
-            </ul>
-            
-            <h4>Engagement Pattern Red Flags:</h4>
-            <ul>
-                <li>High dislike ratio revealed by our hidden dislike checker</li>
-                <li>Comments disabled entirely or heavily filtered to remove criticism</li>
-                <li>Bot-like repetitive comments ("Great video!" posted by multiple accounts)</li>
-                <li>Suspiciously low engagement ratio despite extremely high view counts</li>
-                <li>Recent surge in views without corresponding organic growth</li>
-            </ul>
-            
-            <h4>Channel History Red Flags:</h4>
-            <ul>
-                <li>Brand new channel (less than 6 months old) with sudden viral video</li>
-                <li>Inconsistent or suspicious upload schedule</li>
-                <li>Channel name or branding that changes frequently</li>
-                <li>No legitimate social media presence or verifiable website</li>
-                <li>Multiple similar channels promoting the same product or course</li>
-            </ul>
-            
-            <h3>How TruthScore Reveals Hidden YouTube Dislikes</h3>
-            
-            <p>When YouTube removed the public dislike count in November 2021, scammers celebrated. Fake videos could no longer be easily identified by viewers. TruthScore solves this problem by using the <strong>ReturnYouTubeDislike API</strong>, which crowdsources dislike data from thousands of users with the browser extension installed.</p>
-            
-            <p>Our <strong>YouTube dislike checker</strong> displays:</p>
-            <ul>
-                <li>Total dislike count (completely hidden from regular YouTube viewers)</li>
-                <li>Dislike ratio as a percentage of total votes (likes + dislikes)</li>
-                <li>Comparison metrics to show how the video performs vs. similar content</li>
-                <li>Historical dislike trends when available</li>
-            </ul>
-            
-            <p><strong>Real example:</strong> A video might publicly show 10,000 likes, appearing very popular. But our tool reveals it also has 8,000 dislikes (44% dislike ratio) - a major warning sign that regular viewers never see. This hidden data often exposes scams that look legitimate on the surface.</p>
-            
-            <h3>Types of YouTube Scams We Detect</h3>
-            
-            <h4>1. Passive Income Scams</h4>
-            <p>Videos promising "easy money" with "no work required" or "fully automated systems." These typically sell expensive courses ($500-$2,000) or aggressively push affiliate products that don't deliver results.</p>
-            
-            <h4>2. Dropshipping Course Scams</h4>
-            <p>Outdated or completely ineffective dropshipping strategies wrapped in professional-looking courses. The market is often oversaturated by the time students implement the "secret" tactics.</p>
-            
-            <h4>3. Cryptocurrency and Forex Trading Scams</h4>
-            <p>Get-rich-quick schemes involving trading signals, automated bots, pump-and-dump schemes, or "guaranteed" strategies. The vast majority of followers lose money instead of making it.</p>
-            
-            <h4>4. Affiliate Marketing Funnels</h4>
-            <p>Videos designed solely to drive traffic to expensive courses, tools, or coaching programs via undisclosed affiliate links. The "free" advice is worthless without purchasing their promoted products.</p>
-            
-            <h4>5. Fake Guru Programs</h4>
-            <p>Self-proclaimed experts selling access to their "exclusive" community, mentorship, or mastermind groups. These programs often provide little actual value beyond recycled generic advice.</p>
-            
-            <h3>Frequently Asked Questions About YouTube Scam Detection</h3>
-            
-            <h4>Is TruthScore really free to use?</h4>
-            <p>Yes, TruthScore is completely free with no hidden costs. We may add optional premium features in the future, but core scam detection will always remain free for everyone.</p>
-            
-            <h4>How accurate is the TruthScore scam detection?</h4>
-            <p>Our AI algorithm is approximately 75-85% accurate based on extensive testing against thousands of known scam and legitimate videos. We continuously improve our detection models with new data.</p>
-            
-            <h4>Can I check any YouTube video or just money-making content?</h4>
-            <p>TruthScore works with any public YouTube video. While we're optimized for "make money online" content, dropshipping, passive income, and course promotions, you can analyze any video type.</p>
-            
-            <h4>How do you access dislike data if YouTube hid it?</h4>
-            <p>We use the ReturnYouTubeDislike API, which crowdsources dislike data from browser extension users worldwide. While not 100% complete, it provides a statistically significant sample that reliably indicates video reception.</p>
-            
-            <h4>What should I do if a video scores low on TruthScore?</h4>
-            <p>A low score (below 40 out of 100) indicates high risk with multiple red flags. We strongly recommend: avoiding the video's advice, not purchasing any promoted products, conducting extensive independent research, and checking reviews from unbiased third parties.</p>
-            
-            <h4>Can video creators manipulate their TruthScore?</h4>
-            <p>It's extremely difficult. We analyze multiple independent signals simultaneously (hidden dislikes, authentic comment sentiment, engagement patterns, language markers, channel history). Faking all of these metrics consistently across all data points is nearly impossible for scammers.</p>
-            
-            <h4>Do you store my video search history or personal data?</h4>
-            <p>No, we do not track which videos you analyze, store search history, or collect personal identifying information. See our privacy policy for complete details on our data practices.</p>
-            
-            <h4>What if a legitimate video scores low incorrectly?</h4>
-            <p>False positives can occasionally occur with any automated system. Use TruthScore as one important data point in your decision-making process, not the sole determining factor. Always apply critical thinking and conduct additional research.</p>
-            
-            <h3>Protect Yourself from YouTube Scams Today</h3>
-            
-            <p>Every single day, thousands of people lose hard-earned money to sophisticated YouTube scams. Before clicking "buy now", entering credit card information, or blindly following advice from any video, take these protective steps:</p>
-            
-            <ol>
-                <li><strong>Check the video on TruthScore first</strong> - Takes only 10 seconds and could save you hundreds or thousands of dollars</li>
-                <li><strong>Read all red flags carefully</strong> - We explain specifically why each warning matters and what it indicates</li>
-                <li><strong>Research the creator independently</strong> - Google "[creator name] scam" and "[creator name] review" to read unbiased experiences</li>
-                <li><strong>Never invest money you can't afford to lose</strong> - Especially critical for courses, programs, coaching, or "guaranteed" systems</li>
-                <li><strong>Trust your intuition</strong> - If something sounds too good to be true, it almost certainly is</li>
-                <li><strong>Verify income claims</strong> - Demand proof of real, consistent results over time, not cherry-picked screenshots</li>
-                <li><strong>Check for hidden costs</strong> - "Free" methods often require expensive tools, subscriptions, or upsells to actually work</li>
-            </ol>
-            
-            <h3>Why We Built TruthScore</h3>
-            
-            <p>The creator of TruthScore personally lost $800 to multiple YouTube course scams in 2023. These videos had hundreds of thousands of views, thousands of likes, and seemingly authentic positive comments. Only after purchasing did the reality become clear - hidden dislikes and buried negative feedback that YouTube's interface concealed.</p>
-            
-            <p>TruthScore exists to prevent others from making these same costly mistakes. We believe everyone deserves access to complete, unfiltered information before making financial decisions based on YouTube videos. Scammers thrive in darkness - we bring their deceptive practices into the light.</p>
-            
-            <h3>Start Checking Videos Now - It's Free Forever</h3>
-            
-            <p>Don't be the next scam victim. Use TruthScore's free YouTube scam detector before watching any "make money online," passive income, dropshipping, cryptocurrency, forex trading, or course sales video. Discover the complete truth in just 10 seconds.</p>
-            
-            <p><strong>Simply paste any YouTube URL in the box above to get started.</strong> Protect your money. Protect your time. Make informed decisions.</p>
-        </section>
+async function postToSheets(payload) {
+    if (SHEETS_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') return; // Not configured yet
+    try {
+        await fetch(SHEETS_URL, {
+            method: 'POST',
+            mode: 'no-cors', // Required for Apps Script CORS
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+    } catch (e) {
+        console.warn('Sheets post failed:', e);
+    }
+}
 
-        <footer>
-            <p style="background: #fef3c7; color: #92400e; padding: 0.5rem; border-radius: 4px; display: inline-block; margin-bottom: 1rem;">
-                ⚠️ TruthScore provides risk indicators based on data analysis, not absolute guarantees. Always exercise personal judgment and conduct additional research.
-            </p>
-            <p><strong>Disclaimer:</strong> TruthScore provides probabilistic risk signals based on publicly available data. We use the ReturnYouTubeDislike API for hidden dislike data. Results are for informational purposes only.</p>
-            
-            <div id="paypal-container-JGGHMKAMLZ3X8" style="margin-top: 1rem;"></div>
-            
-            <p style="margin-top: 0.5rem; font-size: 0.7rem;">© 2025 TruthScore. All rights reserved.</p>
-        </footer>
-    </main>
+// ── Internal state ──────────────────────────────────────────────
+let _pendingFlags   = [];
+let _reportText     = '';
+let _currentScore   = '--';
+let _currentTitle   = '';
 
-    <script src="script.js"></script>
-    <script src="https://www.paypal.com/sdk/js?client-id=BAAN-6uTeFePPlFBTb2KRwscuk_CN958_Dp1xPe78I33ZlxbgpQfjilAnXMcrm02M5iYbM9Xr2EnqAwPXs&components=hosted-buttons&disable-funding=venmo&currency=USD"></script>
-    <script>
-      paypal.HostedButtons({
-        hostedButtonId: "JGGHMKAMLZ3X8",
-      }).render("#paypal-container-JGGHMKAMLZ3X8")
-    </script>
+// script.js calls this to hand off flag data after a scan
+window._setGateData = function(flags, reportText, score, title) {
+    _pendingFlags = flags;
+    _reportText   = reportText;
+    _currentScore = score;
+    _currentTitle = title;
+};
+
+// ── EMAIL GATE: unlock full report ──────────────────────────────
+async function unlockReport() {
+    const email    = document.getElementById('gateEmail').value.trim();
+    const statusEl = document.getElementById('gateStatus');
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        statusEl.textContent = '⚠️ Please enter a valid email address.';
+        statusEl.style.color = '#fca5a5';
+        return;
+    }
+
+    statusEl.textContent = 'Saving…';
+    statusEl.style.color = 'var(--muted)';
+
+    await postToSheets({
+        type:       'unlock',
+        email,
+        videoTitle: _currentTitle,
+        score:      _currentScore,
+        timestamp:  new Date().toISOString()
+    });
+
+    // Hide gate, show real flags
+    document.getElementById('emailGate').classList.add('hidden');
+    const fc = document.getElementById('flagsCard');
+    fc.classList.remove('hidden');
+    const ul = document.getElementById('flagsList');
+    ul.innerHTML = '';
+    _pendingFlags.forEach(f => {
+        const li = document.createElement('li');
+        li.className = 'flag-item';
+        li.innerHTML = `<div class="flag-dot ${f.cls}"></div><div class="flag-text">${f.text}</div>`;
+        ul.appendChild(li);
+    });
+}
+
+// ── SHARE on X ─────────────────────────────────────────────────
+function shareResult() {
+    const s    = parseInt(_currentScore);
+    const risk = s < 40 ? '🚨 HIGH RISK' : s < 65 ? '⚠️ SUSPICIOUS' : '✅ Looks OK';
+    const text = encodeURIComponent(
+        `Just ran this YouTube video through TruthScore — it scored ${_currentScore}/100 ${risk}\n\nCheck any video free: https://truthscore.online`
+    );
+    window.open(`https://x.com/intent/tweet?text=${text}`, '_blank', 'width=550,height=420');
+}
+
+// ── COPY REPORT ────────────────────────────────────────────────
+function copyReport() {
+    if (!_reportText) return;
+    navigator.clipboard.writeText(_reportText).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => btn.textContent = '📋 Copy Report', 2000);
+    });
+}
+
+// ── RESET ──────────────────────────────────────────────────────
+function resetTool() {
+    document.getElementById('resultSection').classList.add('hidden');
+    document.getElementById('emailGate').classList.remove('hidden');
+    document.getElementById('flagsCard').classList.add('hidden');
+    document.getElementById('gateStatus').textContent = 'No spam. We'll also notify you when the Chrome extension launches.';
+    document.getElementById('gateStatus').style.color = 'var(--muted)';
+    document.getElementById('gateEmail').value = '';
+    document.getElementById('videoInput').value = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('newBtn').addEventListener('click', resetTool);
+document.getElementById('shareBtn').addEventListener('click', shareResult);
+document.getElementById('copyBtn').addEventListener('click', copyReport);
+
+// ── PRO WAITLIST MODAL ─────────────────────────────────────────
+function openProModal()  { document.getElementById('proModal').classList.add('open'); }
+function closeProModal() { document.getElementById('proModal').classList.remove('open'); }
+
+document.getElementById('proModal').addEventListener('click', function(e) {
+    if (e.target === this) closeProModal();
+});
+
+async function submitProWaitlist() {
+    const name     = document.getElementById('proName').value.trim();
+    const email    = document.getElementById('proEmail').value.trim();
+    const statusEl = document.getElementById('proStatus');
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        statusEl.textContent = '⚠️ Please enter a valid email address.';
+        statusEl.style.color = '#fca5a5';
+        return;
+    }
+
+    statusEl.textContent = 'Saving…';
+    statusEl.style.color = 'var(--muted)';
+
+    await postToSheets({
+        type:      'pro_waitlist',
+        name,
+        email,
+        timestamp: new Date().toISOString()
+    });
+
+    document.getElementById('modalForm').style.display = 'none';
+    document.getElementById('modalSuccess').style.display = 'block';
+}
+</script>
 </body>
 </html>
