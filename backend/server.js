@@ -1,333 +1,307 @@
-// server.js
+// server.js — TruthScore Backend
 require('dotenv').config();
 const express = require('express');
-const axios = require('axios');
-const cors = require('cors');
+const axios   = require('axios');
+const cors    = require('cors');
 
 const app = express();
 app.use(express.json());
-app.use(cors({
-  origin: '*' // in production, lock this to your frontend domain
-}));
+app.use(cors({ origin: '*' }));
 
-const PORT = process.env.PORT || 3000;
+const PORT   = process.env.PORT || 3000;
 const YT_KEY = process.env.YOUTUBE_API_KEY;
-if(!YT_KEY) {
-  console.warn('WARNING: WARNING: YOUTUBE_API_KEY not defined. Set in .env before starting.');
+if (!YT_KEY) {
+  console.warn('WARNING: YOUTUBE_API_KEY not set. Add it to Render environment variables.');
 }
 
+// ── Health check — lets frontend ping to wake server ─────────────────
+app.get('/', (req, res) => res.json({ status: 'ok', service: 'TruthScore' }));
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
+// ── Helpers ───────────────────────────────────────────────────────────
 function extractVideoId(urlOrId) {
-  if(!urlOrId) return null;
+  if (!urlOrId) return null;
   const patterns = [
     /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/i,
     /^([a-zA-Z0-9_-]{11})$/
   ];
-  for(const p of patterns) {
+  for (const p of patterns) {
     const m = urlOrId.match(p);
-    if(m) return m[1];
+    if (m) return m[1];
   }
-  // try URL parsing for v param
   try {
     const u = new URL(urlOrId.includes('://') ? urlOrId : `https://youtube.com/watch?v=${urlOrId}`);
     return u.searchParams.get('v') || null;
-  } catch(e){
-    return null;
+  } catch(e) { return null; }
+}
+
+// ── Fetch hidden dislikes ─────────────────────────────────────────────
+async function fetchDislikeData(videoId) {
+  try {
+    const res = await axios.get(`https://returnyoutubedislikeapi.com/votes?videoId=${videoId}`, { timeout: 8000 });
+    return {
+      dislikes: parseInt(res.data.dislikes) || 0,
+      likes:    parseInt(res.data.likes)    || 0,
+    };
+  } catch(e) {
+    return { dislikes: 0, likes: 0 };
   }
 }
 
-// Fetch Dislike Count from ReturnYouTubeDislike API
-async function fetchDislikeData(videoId) {
-    try {
-        const url = `https://returnyoutubedislikeapi.com/votes?videoId=${videoId}`;
-        const res = await axios.get(url);
-        return {
-            dislikes: parseInt(res.data.dislikes) || 0,
-            likes: parseInt(res.data.likes) || 0,
-        };
-    } catch(e) {
-        return { dislikes: 0, likes: 0 };
-    }
-}
-
-// Fetch video details + comments (first 100) + channel stats
+// ── Fetch all YouTube data ────────────────────────────────────────────
 async function fetchYouTubeData(videoId) {
   const base = 'https://www.googleapis.com/youtube/v3';
-  
+
   // Video details
-  const videoUrl = `${base}/videos?part=snippet,statistics,contentDetails&id=${videoId}&key=${YT_KEY}`;
-  const videoRes = await axios.get(videoUrl);
-  if(!videoRes.data.items || videoRes.data.items.length === 0) {
-    const e = new Error('Video not found');
+  const videoRes = await axios.get(
+    `${base}/videos?part=snippet,statistics,contentDetails&id=${videoId}&key=${YT_KEY}`,
+    { timeout: 10000 }
+  );
+  if (!videoRes.data.items || videoRes.data.items.length === 0) {
+    const e = new Error('Video not found or is private');
     e.status = 404;
     throw e;
   }
   const v = videoRes.data.items[0];
 
-  // Dislike Data 
-  const dislikeData = await fetchDislikeData(videoId);
-  
-  // Comments (top-level only, up to 100)
+  // Dislike data (runs in parallel with comments + channel)
+  const [dislikeData, commentsResult, channelResult] = await Promise.allSettled([
+    fetchDislikeData(videoId),
+    axios.get(
+      `${base}/commentThreads?part=snippet&videoId=${videoId}&maxResults=100&order=relevance&key=${YT_KEY}`,
+      { timeout: 10000 }
+    ),
+    axios.get(
+      `${base}/channels?part=snippet,statistics&id=${v.snippet.channelId}&key=${YT_KEY}`,
+      { timeout: 10000 }
+    )
+  ]);
+
+  const dislikes = dislikeData.status === 'fulfilled' ? dislikeData.value : { dislikes: 0, likes: 0 };
+
   let comments = [];
-  try {
-    const comUrl = `${base}/commentThreads?part=snippet&videoId=${videoId}&maxResults=100&key=${YT_KEY}`;
-    const comRes = await axios.get(comUrl);
-    comments = (comRes.data.items || []).map(c => c.snippet.topLevelComment.snippet.textDisplay);
-  } catch (e) {
-    comments = [];
+  if (commentsResult.status === 'fulfilled') {
+    comments = (commentsResult.value.data.items || [])
+      .map(c => c.snippet.topLevelComment.snippet.textDisplay);
   }
-  
-  // Channel
-  const channelId = v.snippet.channelId;
+
   let channel = null;
-  try {
-    const chUrl = `${base}/channels?part=snippet,statistics&id=${channelId}&key=${YT_KEY}`;
-    const chRes = await axios.get(chUrl);
-    if(chRes.data.items && chRes.data.items.length > 0) {
-      const ch = chRes.data.items[0];
+  if (channelResult.status === 'fulfilled') {
+    const items = channelResult.value.data.items || [];
+    if (items.length > 0) {
+      const ch = items[0];
       channel = {
         subscriberCount: parseInt(ch.statistics.subscriberCount || 0),
-        videoCount: parseInt(ch.statistics.videoCount || 0),
-        viewCount: parseInt(ch.statistics.viewCount || 0),
-        createdAt: ch.snippet.publishedAt
+        videoCount:      parseInt(ch.statistics.videoCount      || 0),
+        viewCount:       parseInt(ch.statistics.viewCount       || 0),
+        createdAt:       ch.snippet.publishedAt
       };
     }
-  } catch(e){
-    channel = null;
   }
 
   return {
     videoId,
-    title: v.snippet.title,
-    description: v.snippet.description,
-    viewCount: parseInt(v.statistics.viewCount || 0),
-    likeCount: dislikeData.likes || parseInt(v.statistics.likeCount || 0),
-    dislikeCount: dislikeData.dislikes, // Added to main object
+    title:        v.snippet.title,
+    description:  v.snippet.description || '',
+    viewCount:    parseInt(v.statistics.viewCount    || 0),
+    likeCount:    dislikes.likes || parseInt(v.statistics.likeCount || 0),
+    dislikeCount: dislikes.dislikes,
     commentCount: parseInt(v.statistics.commentCount || 0),
     channelTitle: v.snippet.channelTitle,
-    channelId,
-    publishedAt: v.snippet.publishedAt,
-    thumbnailUrl: (v.snippet.thumbnails && v.snippet.thumbnails.high && v.snippet.thumbnails.high.url) || null,
+    channelId:    v.snippet.channelId,
+    publishedAt:  v.snippet.publishedAt,
+    thumbnailUrl: v.snippet.thumbnails?.high?.url || null,
     comments,
-    duration: v.contentDetails && v.contentDetails.duration,
+    duration: v.contentDetails?.duration || null,
     channel
   };
 }
 
-// Analysis logic (moved server-side for safety)
+// ── Analysis engine ───────────────────────────────────────────────────
 function analyzeVideoData(data) {
   const flags = [];
   let score = 50;
-  const titleLower = (data.title || '').toLowerCase();
-  const descLower = (data.description || '').toLowerCase();
+  const titleLower = (data.title       || '').toLowerCase();
+  const descLower  = (data.description || '').toLowerCase();
 
-  // 1. Title/description keywords (Scam, Urgency, Hype)
-  const scamKeywords = ['passive income','no work','autopilot','guaranteed','secret method','get rich','easy money','make money fast','overnight success','zero effort','no effort'];
-  const urgencyWords = ['limited time','act now','hurry','don\'t miss','last chance','expires soon','only today'];
+  // 1 — Title / Description scan
+  const scamKeywords  = ['passive income','no work','autopilot','guaranteed','secret method','get rich','easy money','make money fast','overnight success','zero effort','no effort'];
+  const urgencyWords  = ['limited time','act now','hurry','don\'t miss','last chance','expires soon','only today'];
+  const moneyPatterns = [/\$[\d,]+\s*(per|\/)\s*(day|hour|week)/i, /\$?(\d+)k\s*(per|in|\/)/i, /\$[\d,]{5,}/];
+
   const hasScamKeywords = scamKeywords.some(kw => titleLower.includes(kw) || descLower.includes(kw));
-  const hasUrgency = urgencyWords.some(kw => titleLower.includes(kw) || descLower.includes(kw));
+  const hasUrgency      = urgencyWords.some(kw  => titleLower.includes(kw) || descLower.includes(kw));
+  const hasMoneyClaim   = moneyPatterns.some(p  => p.test(data.title) || p.test(data.description));
+  const hasTimeClaim    = /(\d+\s*(hour|day|minute|week)s?|overnight|instantly|immediately)/i.test(data.title);
 
-  // money & time claims
-  const moneyPatterns = [
-    /\$[\d,]+\s*(per|\/)\s*(day|hour|week)/i,
-    /\$?(\d+)k\s*(per|in|\/)/i,
-    /\$[\d,]{5,}/
-  ];
-  const hasMoneyClaim = moneyPatterns.some(p => p.test(data.title) || p.test(data.description));
-  const hasTimeClaim = /(\d+\s*(hour|day|minute|week)s?|overnight|instantly|immediately)/i.test(data.title);
-
-  if(hasScamKeywords && hasMoneyClaim && hasTimeClaim) {
+  if (hasScamKeywords && hasMoneyClaim && hasTimeClaim) {
     score -= 35;
-    flags.push({ type:'red', text:'Unrealistic income + fast-result claims detected', impact:'Common pattern for scams' });
-  } else if(hasScamKeywords && hasMoneyClaim) {
+    flags.push({ type: 'red',    text: 'Unrealistic income + fast-result claims detected',   impact: 'Classic scam pattern' });
+  } else if (hasScamKeywords && hasMoneyClaim) {
     score -= 25;
-    flags.push({ type:'red', text:'High-risk income claims with scam keywords', impact:'High chance of misleading content' });
-  } else if(hasScamKeywords) {
+    flags.push({ type: 'red',    text: 'High-risk income claims combined with scam keywords', impact: 'High chance of misleading content' });
+  } else if (hasScamKeywords) {
     score -= 15;
-    flags.push({ type:'yellow', text:'Title contains known scam phrases', impact:'Verify carefully' });
+    flags.push({ type: 'yellow', text: 'Title contains known scam phrases',                   impact: 'Verify carefully before trusting' });
   } else {
     score += 12;
-    flags.push({ type:'green', text:'Title looks reasonable', impact:'No blatant scam phrases found' });
+    flags.push({ type: 'green',  text: 'Title looks reasonable',                              impact: 'No blatant scam phrases found' });
   }
 
-  if(hasUrgency) {
+  if (hasUrgency) {
     score -= 10;
-    flags.push({ type:'yellow', text:'Urgency or FOMO language detected', impact:'Often used in funnels' });
+    flags.push({ type: 'yellow', text: 'Urgency / FOMO language detected', impact: 'Common psychological pressure tactic' });
   }
 
-  // emoji check
   const emojiCount = (data.title.match(/[💰🤑💸💵💴💶💷🔥⚡✨🚀💎]/g) || []).length;
-  if(emojiCount > 3) {
+  if (emojiCount > 3) {
     score -= 6;
-    flags.push({ type:'yellow', text:`Multiple hype emojis in title (${emojiCount})`, impact:'Clickbait indicator' });
+    flags.push({ type: 'yellow', text: `${emojiCount} hype emojis in title`, impact: 'Strong clickbait indicator' });
   }
 
-  // 2. Engagement Analysis (INCLUDING DISLIKES)
-  const totalVotes = data.likeCount + data.dislikeCount;
-  const engagementRatio = totalVotes / Math.max(data.viewCount, 1);
-  const commentRatio = data.commentCount / Math.max(data.viewCount, 1);
-  const likeDislikeRatio = totalVotes > 0 
-    ? data.dislikeCount / totalVotes
-    : 0; // The ratio of dislikes to total votes
+  // 2 — Engagement & dislike analysis
+  const totalVotes       = data.likeCount + data.dislikeCount;
+  const engagementRatio  = totalVotes / Math.max(data.viewCount, 1);
+  const commentRatio     = data.commentCount / Math.max(data.viewCount, 1);
+  const likeDislikeRatio = totalVotes > 0 ? data.dislikeCount / totalVotes : 0;
 
-  if(data.viewCount > 100000 && engagementRatio < 0.003) {
+  if (data.viewCount > 100000 && engagementRatio < 0.003) {
     score -= 20;
-    flags.push({ type:'red', text:`Very low engagement for high view count (${(engagementRatio*100).toFixed(3)}% interactions)`, impact:'Possible purchased views or bots' });
-  } else if(engagementRatio < 0.01) {
+    flags.push({ type: 'red',    text: `Very low engagement for view count (${(engagementRatio * 100).toFixed(3)}%)`, impact: 'Possible purchased views or bot traffic' });
+  } else if (engagementRatio < 0.01) {
     score -= 10;
-    flags.push({ type:'yellow', text:'Below-average engagement ratio', impact:'Audience may not find value' });
-  } else if(engagementRatio > 0.03) {
+    flags.push({ type: 'yellow', text: 'Below-average engagement ratio', impact: 'Audience may not find real value' });
+  } else if (engagementRatio > 0.03) {
     score += 15;
-    flags.push({ type:'green', text:'Healthy engagement ratio', impact:'Indicates genuine audience' });
+    flags.push({ type: 'green',  text: 'Healthy engagement ratio',       impact: 'Indicates genuine audience interest' });
   }
 
-  // Dislike Ratio Check (NEW LOGIC)
   if (data.dislikeCount > 0) {
-      if (likeDislikeRatio > 0.3) { // Over 30% of votes are dislikes
-          score -= 20;
-          flags.push({ type:'red', text:`High Dislike Ratio (${(likeDislikeRatio*100).toFixed(1)}%)`, impact:'Strong sign of controversial or poor quality content' });
-      } else if (likeDislikeRatio > 0.15) { // Over 15% of votes are dislikes
-          score -= 10;
-          flags.push({ type:'yellow', text:`Noticeable Dislike Ratio (${(likeDislikeRatio*100).toFixed(1)}%)`, impact:'Viewers are expressing dissatisfaction' });
-      }
+    if (likeDislikeRatio > 0.3) {
+      score -= 20;
+      flags.push({ type: 'red',    text: `High hidden dislike ratio: ${(likeDislikeRatio * 100).toFixed(1)}% of votes are dislikes`, impact: 'Strong sign of poor or misleading content' });
+    } else if (likeDislikeRatio > 0.15) {
+      score -= 10;
+      flags.push({ type: 'yellow', text: `Elevated dislike ratio: ${(likeDislikeRatio * 100).toFixed(1)}% of votes are dislikes`,    impact: 'Viewers are expressing dissatisfaction' });
+    } else {
+      flags.push({ type: 'green',  text: `Low dislike ratio: ${(likeDislikeRatio * 100).toFixed(1)}% — viewers generally satisfied`, impact: 'Positive signal' });
+    }
   }
 
-
-  if(data.commentCount === 0 && data.viewCount > 10000) {
+  if (data.commentCount === 0 && data.viewCount > 10000) {
     score -= 15;
-    flags.push({ type:'red', text:'Comments disabled on a popular video', impact:'Often used to hide negative feedback' });
+    flags.push({ type: 'red', text: 'Comments disabled on a popular video', impact: 'Often used to hide negative viewer feedback' });
   }
 
-  // 3. Comment Sentiment
-  const negativeWords = ['scam','fake','lie','lying','liar','didn\'t work','lost money','waste','clickbait','bs','bullshit','refund','disappointed','misleading','fraud','ripoff','don\'t buy','not worth'];
+  // 3 — Comment sentiment
+  const negativeWords = ['scam','fake','lie','lying','liar','didn\'t work','lost money','waste','clickbait','bullshit','refund','disappointed','misleading','fraud','ripoff','don\'t buy','not worth'];
   const positiveWords = ['works','worked','helpful','thank','thanks','great','awesome','legit','legitimate','real','honest','recommend','valuable','learned','success'];
 
-  let neg=0, pos=0, scamMentions=0;
+  let neg = 0, pos = 0, scamMentions = 0;
   (data.comments || []).forEach(c => {
     const lc = c.toLowerCase();
-    negativeWords.forEach(w => { if(lc.includes(w)) neg++; });
-    positiveWords.forEach(w => { if(lc.includes(w)) pos++; });
-    if(lc.includes('scam') || lc.includes('fake') || lc.includes('fraud')) scamMentions++;
+    negativeWords.forEach(w => { if (lc.includes(w)) neg++; });
+    positiveWords.forEach(w => { if (lc.includes(w)) pos++; });
+    if (lc.includes('scam') || lc.includes('fake') || lc.includes('fraud')) scamMentions++;
   });
 
-  if(neg > pos*1.5 && neg > 3) {
+  if (neg > pos * 1.5 && neg > 3) {
     score -= 20;
-    flags.push({ type:'red', text:'Multiple negative comments mentioning scam/fake', impact:'Viewer complaints present' });
-  } else if(neg > pos) {
+    flags.push({ type: 'red',    text: 'Comment section dominated by negative / scam warnings', impact: 'Viewer complaints clearly present' });
+  } else if (neg > pos) {
     score -= 8;
-    flags.push({ type:'yellow', text:'Some negative comments found', impact:'Check comment examples' });
-  } else if(pos > neg) {
+    flags.push({ type: 'yellow', text: 'Some negative comments found',  impact: 'Worth reading the comment section' });
+  } else if (pos > neg) {
     score += 6;
-    flags.push({ type:'green', text:'Comments skew positive', impact:'Audience reports value' });
+    flags.push({ type: 'green',  text: 'Comments skew positive',        impact: 'Viewers report finding value' });
   }
 
-  if(scamMentions > 1) {
+  if (scamMentions > 1) {
     score -= 20;
-    flags.push({ type:'red', text:`${scamMentions} comments explicitly mention "scam" or "fake"`, impact:'Strong red flag' });
+    flags.push({ type: 'red', text: `${scamMentions} comments explicitly call this a scam or fake`, impact: 'Major red flag — do not trust blindly' });
   }
 
-  // 4. Affiliate / Sponsored Content Detection (ENHANCED)
-  // Affiliate Link Detection
-  const affiliateIndicators = ['bit.ly','bitly','tinyurl','clickbank','digistore','affiliat','join now','enroll now','course','coaching','mentorship','dm me on instagram','link in bio','join my course','limited spots','use code','discount link','free training'];
-  const hasAffiliate = affiliateIndicators.some(k => descLower.includes(k));
-  if(hasAffiliate) {
+  // 4 — Affiliate / sponsored content
+  const affiliateIndicators = ['bit.ly','bitly','tinyurl','clickbank','digistore','affiliat','join now','enroll now','course','coaching','mentorship','dm me','link in bio','join my course','limited spots','use code','discount link','free training'];
+  const sponsorIndicators   = ['sponsored','paid promotion','partnered with','thanks to our sponsor','brand deal'];
+
+  if (affiliateIndicators.some(k => descLower.includes(k))) {
     score -= 18;
-    flags.push({ type:'red', text:'Affiliate links / course pitch detected in description', impact:'Often monetization-heavy funnels' });
+    flags.push({ type: 'red',  text: 'Affiliate links or course pitch detected in description', impact: 'Monetisation-heavy funnel — creator profits from your click' });
   }
-  
-  // Sponsored Content Detection (NEW LOGIC)
-  const sponsorIndicators = ['sponsored','paid promotion','ad','advertisement','partnered with','thanks to our sponsor','brand deal'];
-  const hasSponsor = sponsorIndicators.some(k => titleLower.includes(k) || descLower.includes(k));
-  if(hasSponsor) {
-    score -= 5; 
-    flags.push({ type:'blue', text:'Sponsored content detected', impact:'Content may be biased towards the sponsor\'s product' });
+  if (sponsorIndicators.some(k => titleLower.includes(k) || descLower.includes(k))) {
+    score -= 5;
+    flags.push({ type: 'blue', text: 'Sponsored / paid promotion content',                      impact: 'Content may be biased toward a sponsor\'s product' });
   }
 
-  // 5. Channel Trust Score (Formalized)
-  let channelTrustScore = 50; // Base score out of 100
-  if(data.channel) {
-    const createdAt = new Date(data.channel.createdAt);
-    const years = (Date.now() - createdAt.getTime()) / (1000*60*60*24*365);
-    const sub = data.channel.subscriberCount || 0;
-    const videoCount = data.channel.videoCount || 0;
-    
-    // Channel Age
-    if(years > 5) channelTrustScore += 20;
-    else if(years > 2) channelTrustScore += 10;
-    else if(years < 0.5) channelTrustScore -= 15;
+  // 5 — Channel trust score
+  let channelTrustScore = 50;
+  if (data.channel) {
+    const years        = (Date.now() - new Date(data.channel.createdAt).getTime()) / (1000 * 60 * 60 * 24 * 365);
+    const sub          = data.channel.subscriberCount || 0;
+    const videoCount   = data.channel.videoCount      || 0;
+    const videosPerYear = videoCount / Math.max(years, 0.1);
 
-    // Subscriber Count
-    if(sub > 100000) channelTrustScore += 20;
-    else if(sub > 10000) channelTrustScore += 10;
-    else if(sub < 1000) channelTrustScore -= 10;
+    if (years > 5)         channelTrustScore += 20;
+    else if (years > 2)    channelTrustScore += 10;
+    else if (years < 0.5)  channelTrustScore -= 15;
 
-    // Consistency (Videos per year)
-    const videosPerYear = videoCount / Math.max(years, 0.1); // min 0.1 years to avoid division by zero
-    if(videosPerYear > 50) channelTrustScore += 10;
-    else if(videosPerYear < 5 && years > 1) channelTrustScore -= 5;
-    
+    if (sub > 100000)      channelTrustScore += 20;
+    else if (sub > 10000)  channelTrustScore += 10;
+    else if (sub < 1000)   channelTrustScore -= 10;
+
+    if (videosPerYear > 50)              channelTrustScore += 10;
+    else if (videosPerYear < 5 && years > 1) channelTrustScore -= 5;
+
     channelTrustScore = Math.max(0, Math.min(100, channelTrustScore));
-    
-    // Strong Penalty for new channel + potential fraud
-    if(years < 0.5 && sub < 1000 && data.viewCount > 10000) {
+
+    if (years < 0.5 && sub < 1000 && data.viewCount > 10000) {
       score -= 15;
-      flags.push({ type:'red', text:'Very new or small channel with sudden viral video', impact:'Often used to promote affiliate funnels' });
+      flags.push({ type: 'red', text: 'Brand-new or tiny channel with a sudden viral video', impact: 'Common tactic for affiliate funnel scams' });
     }
   } else {
-    channelTrustScore = 30; // Default low if channel data is unavailable
+    channelTrustScore = 30;
   }
 
-  // clamp final score
   score = Math.max(0, Math.min(100, score));
 
-  return {
-    score,
-    flags,
-    engagementRatio,
-    commentRatio,
-    likeDislikeRatio, 
-    channelTrustScore 
-  };
+  return { score, flags, engagementRatio, commentRatio, likeDislikeRatio, channelTrustScore };
 }
 
-// API endpoints
-// POST /api/analyze  { videoId: 'abcd...' }
+// ── API endpoint ──────────────────────────────────────────────────────
 app.post('/api/analyze', async (req, res) => {
   try {
-    const videoIdRaw = (req.body && (req.body.videoId || req.body.url)) || '';
-    const videoId = extractVideoId(videoIdRaw) || videoIdRaw;
-    if(!videoId) return res.status(400).json({ message: 'videoId required' });
+    const raw     = (req.body && (req.body.videoId || req.body.url)) || '';
+    const videoId = extractVideoId(raw) || raw;
+    if (!videoId) return res.status(400).json({ message: 'videoId is required' });
 
-    const data = await fetchYouTubeData(videoId);
+    const data     = await fetchYouTubeData(videoId);
     const analysis = analyzeVideoData(data);
-    
-    // add convenience fields
-    const channelAgeYears = data.channel && data.channel.createdAt ? Math.floor((Date.now() - new Date(data.channel.createdAt)) / (1000*60*60*24*365)) : null;
+    const channelAgeYears = data.channel?.createdAt
+      ? Math.floor((Date.now() - new Date(data.channel.createdAt).getTime()) / (1000 * 60 * 60 * 24 * 365))
+      : null;
 
     return res.json({
       video: {
-        videoId: data.videoId,
-        title: data.title,
-        description: data.description,
-        viewCount: data.viewCount,
-        likeCount: data.likeCount,
-        dislikeCount: data.dislikeCount, // <--- ADDED THIS FIELD
+        videoId:      data.videoId,
+        title:        data.title,
+        description:  data.description,
+        viewCount:    data.viewCount,
+        likeCount:    data.likeCount,
+        dislikeCount: data.dislikeCount,
         commentCount: data.commentCount,
         channelTitle: data.channelTitle,
-        channelId: data.channelId,
+        channelId:    data.channelId,
         thumbnailUrl: data.thumbnailUrl,
-        comments: data.comments,
-        channel: data.channel,
+        channel:      data.channel,
         channelAgeYears
       },
       analysis
     });
-  } catch (err) {
-    console.error(err && err.message ? err.message : err);
-    const status = err.status || 500;
-    res.status(status).json({ message: err.message || 'Internal server error' });
+  } catch(err) {
+    console.error('Analyze error:', err?.message || err);
+    res.status(err.status || 500).json({ message: err.message || 'Internal server error' });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`TruthScore backend running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`TruthScore backend running on port ${PORT}`));
