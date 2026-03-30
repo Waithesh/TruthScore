@@ -1,0 +1,21 @@
+{
+  "name": "TruthScore",
+  "short_name": "TruthScore",
+  "description": "Free YouTube Scam Detector",
+  "icons": [
+    {
+      "src": "/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#080808",
+  "background_color": "#080808",
+  "display": "browser",
+  "start_url": "/"
+}
