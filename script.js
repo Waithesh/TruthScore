@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════
-// TruthScore — script.js  (final clean version)
+// TruthScore — script.js
 // ═══════════════════════════════════════════════
 
 // ── CONFIG — update SHEETS_URL with your new /exec deployment link ──
@@ -173,7 +173,6 @@ async function runAnalyze(optId) {
 
   } catch(err) {
     hideLoader();
-    // Friendly error with retry hint
     if (err.name === 'TypeError' || err.message.includes('fetch')) {
       showErr('Could not reach the analysis server. It may still be waking up — please wait 30 seconds and try again.');
     } else {
@@ -199,34 +198,32 @@ function renderResults(payload) {
 
   const dislikePct = (analysis.likeDislikeRatio * 100).toFixed(1);
 
-  // Video summary
+  // Video summary — always visible
   setText('videoTitle',  video.title);
   setText('channelInfo', video.channelTitle + ' • ' + (video.channelAgeYears || 0) + ' yrs old');
 
+  // Use "est. dislikes" to be honest about the data source
   const votesText = video.dislikeCount != null
-    ? video.likeCount.toLocaleString() + ' likes · ' + video.dislikeCount.toLocaleString() + ' hidden dislikes'
+    ? video.likeCount.toLocaleString() + ' likes · ' + video.dislikeCount.toLocaleString() + ' est. dislikes'
     : video.likeCount.toLocaleString() + ' likes';
   setHTML('metaInfo', video.viewCount.toLocaleString() + ' views · ' + votesText + ' · ' + video.commentCount.toLocaleString() + ' comments');
 
-  // Score ring
+  // ── GATED: Score ring shows "?" until email submitted ──
   const ring = $('scoreRing'), num = $('ringNum');
   if (ring && num) {
-    num.textContent = score + '%';
-    ring.className  = 'score-ring ' + (score >= 75 ? 'ring-green' : score >= 45 ? 'ring-amber' : 'ring-red');
+    num.textContent = '?';
+    ring.className  = 'score-ring ring-locked';
   }
 
-  // Mini stats
-  setText('channelTrust', Math.round(analysis.channelTrustScore) + '/100');
-  const drEl = $('dislikeRatio');
-  if (drEl) {
-    drEl.textContent = dislikePct + '%';
-    drEl.style.color = parseFloat(dislikePct) > 30 ? 'var(--red)'
-                     : parseFloat(dislikePct) > 15 ? 'var(--amber)'
-                     : 'var(--green)';
-  }
-  setText('engagement', (analysis.engagementRatio * 100).toFixed(3) + '%');
+  // ── GATED: Mini stats replaced with blur placeholders ──
+  const channelTrustEl = $('channelTrust');
+  const dislikeRatioEl = $('dislikeRatio');
+  const engagementEl   = $('engagement');
+  if (channelTrustEl) { channelTrustEl.textContent = '??/100'; channelTrustEl.classList.add('stat-locked'); }
+  if (dislikeRatioEl) { dislikeRatioEl.textContent = '?%';     dislikeRatioEl.classList.add('stat-locked'); }
+  if (engagementEl)   { engagementEl.textContent   = '?%';     engagementEl.classList.add('stat-locked');   }
 
-  // Store flags
+  // Store flags and full data for reveal after email
   const sorted = [...analysis.flags].sort((a, b) =>
     ({ red: 1, yellow: 2, blue: 3, green: 4 }[a.type] || 5) -
     ({ red: 1, yellow: 2, blue: 3, green: 4 }[b.type] || 5)
@@ -237,7 +234,17 @@ function renderResults(payload) {
     impact: f.impact || ''
   }));
 
-  // Build shareable report text
+  // Store the real values so we can reveal them after unlock
+  _realScore       = score;
+  _realDislikePct  = dislikePct;
+  _realTrust       = Math.round(analysis.channelTrustScore);
+  _realEngagement  = (analysis.engagementRatio * 100).toFixed(3);
+  _realRingClass   = score >= 75 ? 'ring-green' : score >= 45 ? 'ring-amber' : 'ring-red';
+  _realDislikeColor = parseFloat(dislikePct) > 30 ? 'var(--red)'
+                    : parseFloat(dislikePct) > 15 ? 'var(--amber)'
+                    : 'var(--green)';
+
+  // Build shareable report text (built now, used after unlock)
   const verdict = score >= 75 ? 'Likely Legit' : score >= 45 ? 'Be Careful' : 'HIGH RISK';
   _report = [
     '══════════════════════════════',
@@ -256,15 +263,16 @@ function renderResults(payload) {
     'Checked at https://truthscore.online'
   ].join('\n');
 
-  // Reset gate UI
+  // Reset gate UI with better message
   const gs = $('gateStatus');
-  if (gs) { gs.textContent = "No spam. We'll notify you when the Chrome extension launches."; gs.style.color = 'var(--muted)'; }
+  if (gs) { gs.textContent = 'Free forever. No spam. Unsubscribe anytime.'; gs.style.color = 'var(--muted)'; }
   const ge = $('gateEmail');  if (ge) ge.value = '';
-  const ub = $('unlockBtn');  if (ub) { ub.disabled = false; ub.textContent = 'Unlock Free'; }
+  const ub = $('unlockBtn');  if (ub) { ub.disabled = false; ub.textContent = 'Reveal Full Report'; }
 
   // Returning users skip the gate automatically
   if (hasGivenEmail()) {
     $('emailGate')?.classList.add('hidden');
+    revealLockedUI();
     renderFlags();
   } else {
     $('emailGate')?.classList.remove('hidden');
@@ -274,6 +282,35 @@ function renderResults(payload) {
   $('resultSection')?.classList.remove('hidden');
   injectPayPal();
   window.scrollTo({ top: ($('resultSection')?.offsetTop || 300) - 80, behavior: 'smooth' });
+}
+
+// ── REVEAL LOCKED UI (score + stats) ─────────────
+function revealLockedUI() {
+  // Reveal score ring
+  const ring = $('scoreRing'), num = $('ringNum');
+  if (ring && num) {
+    num.textContent = _realScore + '%';
+    ring.className  = 'score-ring ' + _realRingClass;
+  }
+
+  // Reveal stats
+  const channelTrustEl = $('channelTrust');
+  const dislikeRatioEl = $('dislikeRatio');
+  const engagementEl   = $('engagement');
+
+  if (channelTrustEl) {
+    channelTrustEl.textContent = _realTrust + '/100';
+    channelTrustEl.classList.remove('stat-locked');
+  }
+  if (dislikeRatioEl) {
+    dislikeRatioEl.textContent = _realDislikePct + '%';
+    dislikeRatioEl.style.color = _realDislikeColor;
+    dislikeRatioEl.classList.remove('stat-locked');
+  }
+  if (engagementEl) {
+    engagementEl.textContent = _realEngagement + '%';
+    engagementEl.classList.remove('stat-locked');
+  }
 }
 
 // ── RENDER FLAGS ──────────────────────────────────
@@ -307,7 +344,7 @@ async function unlockReport() {
     return;
   }
 
-  if (btn)      { btn.disabled = true; btn.textContent = 'Saving…'; }
+  if (btn)      { btn.disabled = true; btn.textContent = 'Unlocking…'; }
   if (statusEl) { statusEl.textContent = 'Saving…'; statusEl.style.color = 'var(--muted)'; }
 
   // Save to Google Sheets
@@ -322,11 +359,12 @@ async function unlockReport() {
   // Remember so they never see this gate again
   rememberEmail(email);
 
-  // Reveal the full report
+  // Reveal everything
   $('emailGate')?.classList.add('hidden');
+  revealLockedUI();
   renderFlags();
 
-  if (btn) { btn.disabled = false; btn.textContent = 'Unlock Free'; }
+  if (btn) { btn.disabled = false; btn.textContent = 'Reveal Full Report'; }
 
   setTimeout(() => {
     const fc = $('flagsCard');
