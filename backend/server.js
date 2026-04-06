@@ -120,29 +120,55 @@ async function fetchYouTubeData(videoId) {
 // ── Analysis engine ───────────────────────────────────────────────────
 function analyzeVideoData(data) {
   const flags = [];
-  let score = 50;
+  let score = 55; // slightly optimistic baseline — most videos are not scams
   const titleLower = (data.title       || '').toLowerCase();
   const descLower  = (data.description || '').toLowerCase();
 
-  // 1 — Title / Description scan
-  const scamKeywords  = ['passive income','no work','autopilot','guaranteed','secret method','get rich','easy money','make money fast','overnight success','zero effort','no effort'];
-  const urgencyWords  = ['limited time','act now','hurry','don\'t miss','last chance','expires soon','only today'];
-  const moneyPatterns = [/\$[\d,]+\s*(per|\/)\s*(day|hour|week)/i, /\$?(\d+)k\s*(per|in|\/)/i, /\$[\d,]{5,}/];
+  // ── 1. Title / Description scan ──────────────────────────────────────
 
-  const hasScamKeywords = scamKeywords.some(kw => titleLower.includes(kw) || descLower.includes(kw));
-  const hasUrgency      = urgencyWords.some(kw  => titleLower.includes(kw) || descLower.includes(kw));
-  const hasMoneyClaim   = moneyPatterns.some(p  => p.test(data.title) || p.test(data.description));
-  const hasTimeClaim    = /(\d+\s*(hour|day|minute|week)s?|overnight|instantly|immediately)/i.test(data.title);
+  // Hard scam signals — these are specific enough to only appear in bad content
+  const hardScamKeywords = [
+    'guaranteed income', 'guaranteed profit', 'get rich quick', 'secret method',
+    'make money fast', 'overnight success', 'zero effort', 'no effort required',
+    'autopilot income', 'autopilot money', 'instant cash', 'instant profit'
+  ];
 
-  if (hasScamKeywords && hasMoneyClaim && hasTimeClaim) {
+  // Soft signals — these appear in both legitimate and scam content
+  const softScamKeywords = [
+    'passive income', 'no work', 'easy money', 'make money online',
+    'work from home', 'financial freedom', 'side hustle'
+  ];
+
+  const urgencyWords = [
+    'limited time', 'act now', 'hurry', "don't miss", 'last chance',
+    'expires soon', 'only today', 'ending soon'
+  ];
+
+  const moneyPatterns = [
+    /\$[\d,]+\s*(per|\/)\s*(day|hour|week)/i,
+    /\$?(\d+)k\s*(per|in|\/)\s*(day|week|month)/i,
+    /\$[\d,]{5,}/
+  ];
+
+  const hasHardScam  = hardScamKeywords.some(kw => titleLower.includes(kw) || descLower.includes(kw));
+  const hasSoftScam  = softScamKeywords.some(kw => titleLower.includes(kw));
+  const hasUrgency   = urgencyWords.some(kw     => titleLower.includes(kw) || descLower.includes(kw));
+  const hasMoneyClaim = moneyPatterns.some(p    => p.test(data.title) || p.test(data.description));
+  const hasTimeClaim  = /(\d+\s*(hour|day|minute|week)s?|overnight|instantly|immediately)/i.test(data.title);
+
+  if (hasHardScam && hasMoneyClaim && hasTimeClaim) {
     score -= 35;
-    flags.push({ type: 'red',    text: 'Unrealistic income + fast-result claims detected',   impact: 'Classic scam pattern' });
-  } else if (hasScamKeywords && hasMoneyClaim) {
+    flags.push({ type: 'red',    text: 'Unrealistic income + fast-result claims detected',   impact: 'Classic scam pattern — proceed with extreme caution' });
+  } else if (hasHardScam && hasMoneyClaim) {
     score -= 25;
     flags.push({ type: 'red',    text: 'High-risk income claims combined with scam keywords', impact: 'High chance of misleading content' });
-  } else if (hasScamKeywords) {
+  } else if (hasHardScam) {
     score -= 15;
     flags.push({ type: 'yellow', text: 'Title contains known scam phrases',                   impact: 'Verify carefully before trusting' });
+  } else if (hasSoftScam && hasMoneyClaim) {
+    // soft scam + money claim is a yellow, not red — lots of legit finance channels do this
+    score -= 10;
+    flags.push({ type: 'yellow', text: 'Income-related claims detected in title',             impact: 'Common in both legitimate and misleading content — check the details' });
   } else {
     score += 12;
     flags.push({ type: 'green',  text: 'Title looks reasonable',                              impact: 'No blatant scam phrases found' });
@@ -159,19 +185,20 @@ function analyzeVideoData(data) {
     flags.push({ type: 'yellow', text: `${emojiCount} hype emojis in title`, impact: 'Strong clickbait indicator' });
   }
 
-  // 2 — Engagement & dislike analysis
+  // ── 2. Engagement & dislike analysis ─────────────────────────────────
   const totalVotes       = data.likeCount + data.dislikeCount;
   const engagementRatio  = totalVotes / Math.max(data.viewCount, 1);
   const commentRatio     = data.commentCount / Math.max(data.viewCount, 1);
   const likeDislikeRatio = totalVotes > 0 ? data.dislikeCount / totalVotes : 0;
 
-  if (data.viewCount > 100000 && engagementRatio < 0.003) {
+  // Adjusted thresholds — fairer for smaller channels
+  if (data.viewCount > 50000 && engagementRatio < 0.003) {
     score -= 20;
     flags.push({ type: 'red',    text: `Very low engagement for view count (${(engagementRatio * 100).toFixed(3)}%)`, impact: 'Possible purchased views or bot traffic' });
-  } else if (engagementRatio < 0.01) {
-    score -= 10;
-    flags.push({ type: 'yellow', text: 'Below-average engagement ratio', impact: 'Audience may not find real value' });
-  } else if (engagementRatio > 0.03) {
+  } else if (engagementRatio < 0.008) {
+    score -= 8;
+    flags.push({ type: 'yellow', text: 'Below-average engagement ratio', impact: 'Audience may not be finding real value' });
+  } else if (engagementRatio > 0.025) {
     score += 15;
     flags.push({ type: 'green',  text: 'Healthy engagement ratio',       impact: 'Indicates genuine audience interest' });
   }
@@ -179,10 +206,10 @@ function analyzeVideoData(data) {
   if (data.dislikeCount > 0) {
     if (likeDislikeRatio > 0.3) {
       score -= 20;
-      flags.push({ type: 'red',    text: `High hidden dislike ratio: ${(likeDislikeRatio * 100).toFixed(1)}% of votes are dislikes`, impact: 'Strong sign of poor or misleading content' });
+      flags.push({ type: 'red',    text: `High estimated dislike ratio: ${(likeDislikeRatio * 100).toFixed(1)}% of votes are dislikes`, impact: 'Strong sign of poor or misleading content' });
     } else if (likeDislikeRatio > 0.15) {
       score -= 10;
-      flags.push({ type: 'yellow', text: `Elevated dislike ratio: ${(likeDislikeRatio * 100).toFixed(1)}% of votes are dislikes`,    impact: 'Viewers are expressing dissatisfaction' });
+      flags.push({ type: 'yellow', text: `Elevated estimated dislike ratio: ${(likeDislikeRatio * 100).toFixed(1)}%`, impact: 'Viewers are expressing dissatisfaction' });
     } else {
       flags.push({ type: 'green',  text: `Low dislike ratio: ${(likeDislikeRatio * 100).toFixed(1)}% — viewers generally satisfied`, impact: 'Positive signal' });
     }
@@ -193,72 +220,118 @@ function analyzeVideoData(data) {
     flags.push({ type: 'red', text: 'Comments disabled on a popular video', impact: 'Often used to hide negative viewer feedback' });
   }
 
-  // 3 — Comment sentiment
-  const negativeWords = ['scam','fake','lie','lying','liar','didn\'t work','lost money','waste','clickbait','bullshit','refund','disappointed','misleading','fraud','ripoff','don\'t buy','not worth'];
-  const positiveWords = ['works','worked','helpful','thank','thanks','great','awesome','legit','legitimate','real','honest','recommend','valuable','learned','success'];
+  // ── 3. Comment sentiment (per-comment scoring, not per-keyword) ───────
+  const negativePatterns = [
+    'scam', 'fake', 'fraud', 'ripoff', 'rip off', 'misleading', 'liar', 'lying',
+    'lost money', 'lost my money', "didn't work", 'does not work', 'doesnt work',
+    'waste of time', 'waste of money', 'clickbait', 'not worth', "don't buy",
+    'disappointed', 'refund', 'reported', 'false', 'bs ', 'bullshit'
+  ];
+  const positivePatterns = [
+    'works', 'worked', 'it works', 'helpful', 'thank you', 'thanks',
+    'great video', 'great content', 'awesome', 'legit', 'legitimate',
+    'honest', 'recommend', 'valuable', 'learned', 'success', 'love this',
+    'love your', 'amazing', 'best video', 'keep it up', 'well explained'
+  ];
 
-  let neg = 0, pos = 0, scamMentions = 0;
+  let negComments = 0, posComments = 0, scamMentions = 0;
+
   (data.comments || []).forEach(c => {
     const lc = c.toLowerCase();
-    negativeWords.forEach(w => { if (lc.includes(w)) neg++; });
-    positiveWords.forEach(w => { if (lc.includes(w)) pos++; });
+    const hasNeg = negativePatterns.some(w => lc.includes(w));
+    const hasPos = positivePatterns.some(w => lc.includes(w));
+
+    // Count each comment once even if multiple keywords match
+    if (hasNeg) negComments++;
+    if (hasPos && !hasNeg) posComments++; // only count as positive if no negative signal
+
     if (lc.includes('scam') || lc.includes('fake') || lc.includes('fraud')) scamMentions++;
   });
 
-  if (neg > pos * 1.5 && neg > 3) {
+  const totalSentimentComments = negComments + posComments;
+
+  if (negComments > posComments * 1.5 && negComments > 3) {
     score -= 20;
     flags.push({ type: 'red',    text: 'Comment section dominated by negative / scam warnings', impact: 'Viewer complaints clearly present' });
-  } else if (neg > pos) {
+  } else if (negComments > posComments && negComments > 2) {
     score -= 8;
-    flags.push({ type: 'yellow', text: 'Some negative comments found',  impact: 'Worth reading the comment section' });
-  } else if (pos > neg) {
+    flags.push({ type: 'yellow', text: 'Some negative comments found',  impact: 'Worth reading the comment section carefully' });
+  } else if (posComments > negComments && totalSentimentComments > 3) {
     score += 6;
     flags.push({ type: 'green',  text: 'Comments skew positive',        impact: 'Viewers report finding value' });
   }
 
-  if (scamMentions > 1) {
+  if (scamMentions > 2) {
     score -= 20;
     flags.push({ type: 'red', text: `${scamMentions} comments explicitly call this a scam or fake`, impact: 'Major red flag — do not trust blindly' });
+  } else if (scamMentions === 2) {
+    score -= 10;
+    flags.push({ type: 'yellow', text: '2 comments question the legitimacy of this video', impact: 'Worth investigating further' });
   }
 
-  // 4 — Affiliate / sponsored content
-  const affiliateIndicators = ['bit.ly','bitly','tinyurl','clickbank','digistore','affiliat','join now','enroll now','course','coaching','mentorship','dm me','link in bio','join my course','limited spots','use code','discount link','free training'];
-  const sponsorIndicators   = ['sponsored','paid promotion','partnered with','thanks to our sponsor','brand deal'];
+  // ── 4. Affiliate / sponsored content (smarter detection) ─────────────
 
-  if (affiliateIndicators.some(k => descLower.includes(k))) {
+  // Strong affiliate signals — these are specific to scammy funnels
+  const hardAffiliateIndicators = [
+    'bit.ly', 'bitly', 'tinyurl', 'clickbank', 'digistore',
+    'join my course', 'limited spots', 'only a few spots',
+    'dm me for', 'dm me to', 'link in bio', 'discount link'
+  ];
+
+  // Soft affiliate signals — legitimate creators do these too
+  const softAffiliateIndicators = [
+    'affiliat', 'use code', 'enroll now', 'join now', 'free training',
+    'course', 'coaching', 'mentorship'
+  ];
+
+  const hasHardAffiliate = hardAffiliateIndicators.some(k => descLower.includes(k));
+  const hasSoftAffiliate = softAffiliateIndicators.some(k => descLower.includes(k));
+
+  if (hasHardAffiliate) {
     score -= 18;
-    flags.push({ type: 'red',  text: 'Affiliate links or course pitch detected in description', impact: 'Monetisation-heavy funnel — creator profits from your click' });
+    flags.push({ type: 'red',    text: 'High-pressure affiliate funnel detected in description', impact: 'Creator profits heavily from your clicks — verify independently' });
+  } else if (hasSoftAffiliate) {
+    score -= 6;
+    flags.push({ type: 'yellow', text: 'Affiliate links or course pitch detected in description', impact: 'Creator may earn a commission — not necessarily a red flag' });
   }
+
+  const sponsorIndicators = ['sponsored', 'paid promotion', 'partnered with', 'thanks to our sponsor', 'brand deal'];
   if (sponsorIndicators.some(k => titleLower.includes(k) || descLower.includes(k))) {
     score -= 5;
-    flags.push({ type: 'blue', text: 'Sponsored / paid promotion content',                      impact: 'Content may be biased toward a sponsor\'s product' });
+    flags.push({ type: 'blue', text: 'Sponsored / paid promotion content', impact: "Content may be biased toward a sponsor's product" });
   }
 
-  // 5 — Channel trust score
+  // ── 5. Channel trust score ────────────────────────────────────────────
   let channelTrustScore = 50;
   if (data.channel) {
-    const years        = (Date.now() - new Date(data.channel.createdAt).getTime()) / (1000 * 60 * 60 * 24 * 365);
-    const sub          = data.channel.subscriberCount || 0;
-    const videoCount   = data.channel.videoCount      || 0;
+    const years         = (Date.now() - new Date(data.channel.createdAt).getTime()) / (1000 * 60 * 60 * 24 * 365);
+    const sub           = data.channel.subscriberCount || 0;
+    const videoCount    = data.channel.videoCount      || 0;
     const videosPerYear = videoCount / Math.max(years, 0.1);
 
-    if (years > 5)         channelTrustScore += 20;
-    else if (years > 2)    channelTrustScore += 10;
-    else if (years < 0.5)  channelTrustScore -= 15;
+    if (years > 5)        channelTrustScore += 20;
+    else if (years > 2)   channelTrustScore += 10;
+    else if (years < 0.5) channelTrustScore -= 15;
 
-    if (sub > 100000)      channelTrustScore += 20;
-    else if (sub > 10000)  channelTrustScore += 10;
-    else if (sub < 1000)   channelTrustScore -= 10;
+    if (sub > 100000)     channelTrustScore += 20;
+    else if (sub > 10000) channelTrustScore += 10;
+    else if (sub < 1000)  channelTrustScore -= 10;
 
-    if (videosPerYear > 50)              channelTrustScore += 10;
+    if (videosPerYear > 50)               channelTrustScore += 10;
     else if (videosPerYear < 5 && years > 1) channelTrustScore -= 5;
 
     channelTrustScore = Math.max(0, Math.min(100, channelTrustScore));
 
+    // Brand-new channel with sudden viral video — strong scam signal
     if (years < 0.5 && sub < 1000 && data.viewCount > 10000) {
       score -= 15;
       flags.push({ type: 'red', text: 'Brand-new or tiny channel with a sudden viral video', impact: 'Common tactic for affiliate funnel scams' });
     }
+
+    // Let channel trust nudge the main score slightly
+    if (channelTrustScore >= 80) score += 5;
+    else if (channelTrustScore <= 30) score -= 8;
+
   } else {
     channelTrustScore = 30;
   }
