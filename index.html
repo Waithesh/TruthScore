@@ -27,7 +27,16 @@
     <meta name="twitter:image" content="https://truthscore.online/twitter-card.jpg">
 
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🛡️</text></svg>">
+
+    <!-- Favicons — proper size chain so the icon renders crisply everywhere -->
+    <link rel="icon" type="image/x-icon"       href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16"   href="/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32"   href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48"   href="/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512x512.png">
+    <link rel="apple-touch-icon" sizes="180x180"      href="/apple-touch-icon.png">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
@@ -117,7 +126,7 @@
         .summary-card { background: var(--surf); border: 1px solid var(--border); border-radius: 16px; padding: 1.75rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: .75rem; }
         .vid-meta h2 { font-size: 1.05rem; font-weight: 600; margin-bottom: .25rem; }
         .vid-meta p  { color: var(--muted); font-size: .85rem; }
-        .score-ring { width: 88px; height: 88px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; font-family: 'Syne', sans-serif; font-weight: 800; border: 3px solid currentColor; }
+        .score-ring { width: 88px; height: 88px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; font-family: 'Syne', sans-serif; font-weight: 800; border: 3px solid currentColor; transition: color .4s, background .4s; }
         .ring-num   { font-size: 1.75rem; line-height: 1; }
         .ring-label { font-size: .55rem; text-transform: uppercase; letter-spacing: .07em; }
         .ring-red   { color: var(--red);   background: rgba(239,68,68,.08); }
@@ -126,7 +135,7 @@
         .mini-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: .6rem; margin-bottom: .75rem; }
         .mini-card { background: var(--surf); border: 1px solid var(--border); border-radius: 12px; padding: .9rem; text-align: center; }
         .mini-lbl { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .3rem; }
-        .mini-val { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.25rem; }
+        .mini-val { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.25rem; transition: filter .4s, opacity .4s; }
 
         /* EMAIL GATE */
         .gate-wrapper { background: var(--surf); border: 1px solid rgba(239,68,68,.35); border-radius: 16px; overflow: hidden; margin-bottom: .75rem; }
@@ -213,6 +222,24 @@
         .modal-note { font-size:.7rem; color:var(--muted); margin-top:.5rem; }
         .modal-success { display:none; }
 
+        /* LOCKED STATE */
+        .ring-locked {
+            color: #444;
+            background: rgba(255,255,255,.03);
+            border-color: #333 !important;
+            filter: blur(2px);
+            user-select: none;
+            pointer-events: none;
+            transition: filter .4s, color .4s;
+        }
+        .stat-locked {
+            filter: blur(5px);
+            opacity: .35;
+            user-select: none;
+            pointer-events: none;
+            transition: filter .4s, opacity .4s;
+        }
+
         /* UTILS */
         .hidden { display:none !important; }
         .wrap { max-width: 800px; margin: 0 auto; padding: 0 1.25rem; }
@@ -255,9 +282,18 @@
         </div>
         <div id="inputError" class="error-msg hidden"></div>
         <div class="trust-row">
-            <div class="trust-item"><div class="trust-num" style="color:var(--accent)">2,400+</div><div class="trust-lbl">Videos scanned</div></div>
-            <div class="trust-item"><div class="trust-num" style="color:var(--amber)">$800</div><div class="trust-lbl">Avg. loss prevented</div></div>
-            <div class="trust-item"><div class="trust-num" style="color:var(--green)">~80%</div><div class="trust-lbl">Accuracy</div></div>
+            <div class="trust-item">
+                <div class="trust-num" style="color:var(--accent)">2,400+</div>
+                <div class="trust-lbl">Videos scanned</div>
+            </div>
+            <div class="trust-item">
+                <div class="trust-num" style="color:var(--amber)">5 Signals</div>
+                <div class="trust-lbl">Per analysis</div>
+            </div>
+            <div class="trust-item">
+                <div class="trust-num" style="color:var(--green)">Free</div>
+                <div class="trust-lbl">Always</div>
+            </div>
         </div>
     </div>
 
@@ -295,9 +331,9 @@
                 <p>Drop your email to see every warning — free, no spam, unsubscribe anytime.</p>
                 <div class="gate-form">
                     <input type="email" id="gateEmail" placeholder="you@example.com" />
-                    <button class="btn-unlock" id="unlockBtn" onclick="unlockReport()">Unlock Free</button>
+                    <button class="btn-unlock" id="unlockBtn" onclick="unlockReport()">Reveal Report</button>
                 </div>
-                <div id="gateStatus" class="gate-note">No spam. We'll also notify you when the Chrome extension launches.</div>
+                <div id="gateStatus" class="gate-note">Free forever. No spam. Unsubscribe anytime.</div>
             </div>
         </div>
 
@@ -394,7 +430,7 @@
         <h4>Is TruthScore free?</h4>
         <p>Yes. Core scam detection is always free. A Pro Chrome extension is coming soon — join the waitlist above.</p>
         <h4>How accurate is the score?</h4>
-        <p>Approximately 75–85% accurate based on testing against known scam and legitimate videos. We continuously improve our models.</p>
+        <p>TruthScore combines 5 independent signals — hidden dislikes, engagement patterns, channel history, comment sentiment, and language analysis. No automated tool can guarantee accuracy, but multi-signal analysis is significantly more reliable than any single metric alone.</p>
         <h4>How do you access hidden dislike data?</h4>
         <p>We use the ReturnYouTubeDislike API, which crowdsources data from thousands of browser extension users worldwide.</p>
         <h4>Do you store my data?</h4>
