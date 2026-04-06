@@ -386,22 +386,22 @@ footer {
 
 /* == 12. Locked State (email gate) == */
 
-/* Score ring shows "?" — muted border, blurred content */
+/* Score ring shows "?" — muted, blurred, intentionally hidden */
 .ring-locked {
-    color: #555;
-    background: rgba(255, 255, 255, 0.04);
-    border-color: #444 !important;
+    color: #444 !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-color: #333 !important;
     filter: blur(2px);
     user-select: none;
     pointer-events: none;
-    transition: filter 0.3s, color 0.3s;
+    transition: filter 0.4s ease, color 0.4s ease, background 0.4s ease;
 }
 
-/* Mini stat values — blurred placeholder */
+/* Mini stat values — blurred "??" placeholders */
 .stat-locked {
     filter: blur(5px);
-    opacity: 0.4;
+    opacity: 0.35;
     user-select: none;
     pointer-events: none;
-    transition: filter 0.3s, opacity 0.3s;
+    transition: filter 0.4s ease, opacity 0.4s ease;
 }
