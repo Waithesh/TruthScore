@@ -383,3 +383,25 @@ footer {
         font-size: 1.35rem;
     }
 }
+
+/* == 12. Locked State (email gate) == */
+
+/* Score ring shows "?" — muted border, blurred content */
+.ring-locked {
+    color: #555;
+    background: rgba(255, 255, 255, 0.04);
+    border-color: #444 !important;
+    filter: blur(2px);
+    user-select: none;
+    pointer-events: none;
+    transition: filter 0.3s, color 0.3s;
+}
+
+/* Mini stat values — blurred placeholder */
+.stat-locked {
+    filter: blur(5px);
+    opacity: 0.4;
+    user-select: none;
+    pointer-events: none;
+    transition: filter 0.3s, opacity 0.3s;
+}
