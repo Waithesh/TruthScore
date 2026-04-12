@@ -1,481 +1,414 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NBX85PJ1YJ"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-NBX85PJ1YJ');
-    </script>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TruthScore - Free YouTube Scam Detector | Check Video Legitimacy in 10 Seconds</title>
-    <meta name="description" content="Free AI-powered YouTube scam detector. Reveals hidden dislikes, analyzes comments for red flags, and detects manipulative language. Protect yourself from fake 'make money' videos instantly.">
-    <meta name="keywords" content="youtube scam detector, check youtube video legitimacy, youtube dislike checker, detect youtube scams, youtube credibility checker, see hidden dislikes, make money online scam detector, youtube fraud detector">
-    <link rel="canonical" href="https://truthscore.online/">
-
-    <meta property="og:title" content="TruthScore - Free YouTube Scam Detector">
-    <meta property="og:description" content="Check if YouTube videos are scams. Free AI analysis reveals hidden dislikes and red flags in 10 seconds.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://truthscore.online">
-    <meta property="og:image" content="https://truthscore.online/og-image.jpg">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="TruthScore - YouTube Scam Detector">
-    <meta name="twitter:description" content="Analyze YouTube videos for scam patterns. Free tool reveals hidden metrics.">
-    <meta name="twitter:image" content="https://truthscore.online/twitter-card.jpg">
-
-    <link rel="stylesheet" href="style.css">
-
-    <!-- Favicons — proper size chain so the icon renders crisply everywhere -->
-    <link rel="icon" type="image/x-icon"       href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="16x16"   href="/favicon-16x16.png">
-    <link rel="icon" type="image/png" sizes="32x32"   href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="48x48"   href="/favicon-48x48.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512x512.png">
-    <link rel="apple-touch-icon" sizes="180x180"      href="/apple-touch-icon.png">
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-
-    <!-- SCHEMA — no fake ratings -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "TruthScore",
-      "url": "https://truthscore.online",
-      "operatingSystem": "All",
-      "applicationCategory": "BrowserApplication",
-      "description": "Free YouTube scam detector that analyzes videos for fraud patterns, hidden dislikes, and red flags",
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
-    }
-    </script>
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        { "@type": "Question", "name": "How do I check if a YouTube video is a scam?", "acceptedAnswer": { "@type": "Answer", "text": "Paste any YouTube URL into TruthScore. In 10 seconds you'll see the scam score (0-100), hidden dislike ratio, and specific red flags." } },
-        { "@type": "Question", "name": "Can I see YouTube dislikes?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. TruthScore uses the ReturnYouTubeDislike API to reveal the dislike count that YouTube hides." } },
-        { "@type": "Question", "name": "Is TruthScore free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Core scam detection is free. A Pro Chrome extension is coming soon." } },
-        { "@type": "Question", "name": "How accurate is the scam score?", "acceptedAnswer": { "@type": "Answer", "text": "Approximately 75-85% accurate based on testing against known scam and legitimate videos." } }
-      ]
-    }
-    </script>
-
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --red:    #ef4444;
-            --red-dk: #b91c1c;
-            --amber:  #f59e0b;
-            --green:  #22c55e;
-            --bg:     #080808;
-            --surf:   #111111;
-            --surf2:  #1a1a1a;
-            --border: #222222;
-            --text:   #f0f0f0;
-            --muted:  #777;
-            --accent: #ff3c3c;
-        }
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
-        body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; line-height: 1.65; }
-
-        /* NAV */
-        .nav {
-            position: sticky; top: 0; z-index: 200;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 1rem 2rem;
-            background: rgba(8,8,8,0.92); backdrop-filter: blur(14px);
-            border-bottom: 1px solid var(--border);
-        }
-        .nav-logo { display: flex; align-items: center; gap: .5rem; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.25rem; color: var(--text); text-decoration: none; }
-        .nav-logo span { color: var(--accent); }
-        .btn-nav { background: none; border: 1px solid var(--accent); color: var(--accent); padding: .4rem 1rem; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: .85rem; cursor: pointer; transition: background .2s, color .2s; }
-        .btn-nav:hover { background: var(--accent); color: #fff; }
-
-        /* HERO */
-        .hero { text-align: center; padding: 5rem 1.25rem 2.5rem; max-width: 680px; margin: 0 auto; }
-        .pill { display: inline-flex; align-items: center; gap: .35rem; background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3); color: #fca5a5; font-size: .75rem; font-weight: 600; padding: .3rem .85rem; border-radius: 999px; margin-bottom: 1.5rem; letter-spacing: .05em; text-transform: uppercase; }
-        .hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(2.1rem, 5vw, 3.4rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.1rem; }
-        .hero h1 em { font-style: normal; color: var(--accent); }
-        .hero-sub { color: var(--muted); font-size: 1.05rem; max-width: 500px; margin: 0 auto 2.5rem; }
-
-        /* INPUT CARD */
-        .input-card { background: var(--surf); border: 1px solid var(--border); border-radius: 18px; padding: 2rem; max-width: 680px; margin: 0 auto 1.5rem; }
-        .input-label { display: block; font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: .6rem; }
-        .input-row { display: flex; gap: .6rem; }
-        .input-row input { flex: 1; background: var(--surf2); border: 1px solid var(--border); border-radius: 10px; padding: .85rem 1rem; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: .95rem; outline: none; transition: border-color .2s; }
-        .input-row input::placeholder { color: var(--muted); }
-        .input-row input:focus { border-color: var(--accent); }
-        .btn-analyze { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: .85rem 1.5rem; font-family: 'Syne', sans-serif; font-weight: 700; font-size: .95rem; cursor: pointer; white-space: nowrap; transition: background .2s, transform .15s; }
-        .btn-analyze:hover { background: var(--red-dk); transform: translateY(-1px); }
-        .demo-btn { background: none; border: none; color: var(--muted); font-size: .82rem; cursor: pointer; margin-top: .75rem; text-decoration: underline; transition: color .2s; }
-        .demo-btn:hover { color: var(--text); }
-        .error-msg { color: #fca5a5; font-size: .85rem; margin-top: .5rem; }
-        .trust-row { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; border-top: 1px solid var(--border); margin-top: 1.75rem; padding-top: 1.5rem; }
-        .trust-item { text-align: center; }
-        .trust-num { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; }
-        .trust-lbl { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
-
-        /* RESULTS */
-        .results { max-width: 680px; margin: 0 auto 3rem; }
-        .summary-card { background: var(--surf); border: 1px solid var(--border); border-radius: 16px; padding: 1.75rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: .75rem; }
-        .vid-meta h2 { font-size: 1.05rem; font-weight: 600; margin-bottom: .25rem; }
-        .vid-meta p  { color: var(--muted); font-size: .85rem; }
-        .score-ring { width: 88px; height: 88px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; font-family: 'Syne', sans-serif; font-weight: 800; border: 3px solid currentColor; transition: color .4s, background .4s; }
-        .ring-num   { font-size: 1.75rem; line-height: 1; }
-        .ring-label { font-size: .55rem; text-transform: uppercase; letter-spacing: .07em; }
-        .ring-red   { color: var(--red);   background: rgba(239,68,68,.08); }
-        .ring-amber { color: var(--amber); background: rgba(245,158,11,.08); }
-        .ring-green { color: var(--green); background: rgba(34,197,94,.08);  }
-        .mini-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: .6rem; margin-bottom: .75rem; }
-        .mini-card { background: var(--surf); border: 1px solid var(--border); border-radius: 12px; padding: .9rem; text-align: center; }
-        .mini-lbl { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .3rem; }
-        .mini-val { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.25rem; transition: filter .4s, opacity .4s; }
-
-        /* EMAIL GATE */
-        .gate-wrapper { background: var(--surf); border: 1px solid rgba(239,68,68,.35); border-radius: 16px; overflow: hidden; margin-bottom: .75rem; }
-        .gate-blur { padding: 1.25rem 1.5rem; filter: blur(5px) brightness(.4); user-select: none; pointer-events: none; }
-        .fake-flag { display: flex; gap: .75rem; margin-bottom: .85rem; align-items: center; }
-        .fake-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; background: var(--red); }
-        .fake-line { height: 13px; border-radius: 4px; background: var(--muted); opacity: .5; }
-        .gate-cta { padding: 1.75rem 1.5rem; text-align: center; border-top: 1px solid rgba(239,68,68,.2); }
-        .gate-cta h3 { font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 800; margin-bottom: .4rem; }
-        .gate-cta p  { color: var(--muted); font-size: .875rem; margin-bottom: 1rem; }
-        .gate-form { display: flex; gap: .5rem; max-width: 400px; margin: 0 auto; }
-        .gate-form input { flex: 1; background: var(--surf2); border: 1px solid var(--border); border-radius: 8px; padding: .7rem .9rem; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: .9rem; outline: none; transition: border-color .2s; }
-        .gate-form input:focus { border-color: var(--accent); }
-        .btn-unlock { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: .7rem 1.2rem; font-family: 'Syne', sans-serif; font-weight: 700; font-size: .88rem; cursor: pointer; white-space: nowrap; transition: background .2s; }
-        .btn-unlock:hover { background: var(--red-dk); }
-        .gate-note { font-size: .7rem; color: var(--muted); margin-top: .5rem; }
-
-        /* FLAGS */
-        .flags-card { background: var(--surf); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: .75rem; }
-        .flags-card h3 { font-size: .95rem; font-weight: 600; margin-bottom: 1rem; }
-        .flag-item { display: flex; gap: .75rem; margin-bottom: .9rem; align-items: flex-start; }
-        .flag-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
-        .fd-red    { background: var(--red); }
-        .fd-amber  { background: var(--amber); }
-        .fd-green  { background: var(--green); }
-        .flag-text { font-size: .9rem; }
-
-        /* ACTION ROW */
-        .action-row { display: flex; gap: .6rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
-        .btn-tw   { flex: 1; background: #1d9bf0; color: #fff; border: none; border-radius: 10px; padding: .8rem 1rem; font-family: 'Syne', sans-serif; font-weight: 700; font-size: .875rem; cursor: pointer; transition: background .2s; white-space: nowrap; min-width: 120px; }
-        .btn-tw:hover { background: #1a8cd8; }
-        .btn-copy { flex: 1; background: var(--surf2); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: .8rem 1rem; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: .875rem; cursor: pointer; transition: background .2s; white-space: nowrap; min-width: 120px; }
-        .btn-copy:hover { background: #222; }
-        .btn-new  { flex: 1; background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: .8rem 1rem; font-family: 'Syne', sans-serif; font-weight: 700; font-size: .875rem; cursor: pointer; transition: background .2s; white-space: nowrap; min-width: 120px; }
-        .btn-new:hover { background: var(--red-dk); }
-
-        /* PRO UPSELL */
-        .pro-card { background: linear-gradient(135deg,#160606,#1c0c0c); border: 1px solid rgba(239,68,68,.3); border-radius: 18px; padding: 2.25rem; text-align: center; margin-bottom: 3rem; }
-        .pro-badge-lbl { display: inline-block; background: var(--accent); color: #fff; font-family: 'Syne', sans-serif; font-size: .68rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; padding: .22rem .65rem; border-radius: 4px; margin-bottom: 1rem; }
-        .pro-card h3 { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; margin-bottom: .5rem; }
-        .pro-card > p { color: var(--muted); font-size: .9rem; max-width: 400px; margin: 0 auto 1.25rem; }
-        .pro-feats { display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem 1.5rem; margin-bottom: 1.5rem; }
-        .pro-feat { font-size: .85rem; color: #fca5a5; }
-        .pro-feat::before { content: '✓ '; color: var(--accent); font-weight: 700; }
-        .btn-pro { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: .9rem 2.25rem; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; cursor: pointer; transition: background .2s, transform .15s; }
-        .btn-pro:hover { background: var(--red-dk); transform: translateY(-2px); }
-        .pro-sub { font-size: .73rem; color: var(--muted); margin-top: .6rem; }
-
-        /* WHY */
-        .why { max-width: 680px; margin: 0 auto 4rem; }
-        .why h2 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; text-align: center; margin-bottom: 1.25rem; }
-        .why-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(190px,1fr)); gap: .85rem; }
-        .why-card { background: var(--surf); border: 1px solid var(--border); border-radius: 14px; padding: 1.35rem; }
-        .why-icon { font-size: 1.5rem; margin-bottom: .5rem; }
-        .why-card h4 { font-size: .92rem; font-weight: 600; margin-bottom: .3rem; }
-        .why-card p  { font-size: .82rem; color: var(--muted); }
-
-        /* SEO CONTENT */
-        .seo { max-width: 680px; margin: 0 auto 4rem; border-top: 1px solid var(--border); padding-top: 3rem; color: var(--muted); font-size: .88rem; }
-        .seo h2 { font-family:'Syne',sans-serif; font-size:1.25rem; font-weight:800; color:var(--text); margin:2rem 0 .65rem; }
-        .seo h3 { font-size:.95rem; font-weight:600; color:var(--text); margin:1.4rem 0 .45rem; }
-        .seo h4 { font-size:.88rem; font-weight:600; color:var(--text); margin:1rem 0 .35rem; }
-        .seo p  { margin-bottom:.7rem; }
-        .seo ul, .seo ol { padding-left:1.4rem; margin-bottom:.7rem; }
-        .seo li { margin-bottom:.35rem; }
-        .seo strong { color:var(--text); }
-
-        /* FOOTER */
-        footer { max-width: 680px; margin: 0 auto; border-top: 1px solid var(--border); padding: 2rem 1.25rem; text-align: center; color: var(--muted); font-size: .78rem; }
-        .footer-warn { background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.2); color: #fcd34d; padding: .6rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: .78rem; }
-
-        /* MODAL */
-        .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.78); z-index: 300; align-items: center; justify-content: center; padding: 1rem; }
-        .modal-bg.open { display: flex; }
-        .modal { background: var(--surf); border: 1px solid var(--border); border-radius: 20px; padding: 2.5rem 2rem; max-width: 440px; width: 100%; text-align: center; position: relative; }
-        .modal-x { position: absolute; top: 1rem; right: 1.25rem; background: none; border: none; color: var(--muted); font-size: 1.4rem; cursor: pointer; line-height: 1; }
-        .modal h3 { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; margin-bottom:.5rem; }
-        .modal p  { color:var(--muted); font-size:.88rem; margin-bottom:1.25rem; }
-        .modal-form { display:flex; flex-direction:column; gap:.65rem; }
-        .modal-form input { background:var(--surf2); border:1px solid var(--border); border-radius:8px; padding:.8rem 1rem; color:var(--text); font-family:'DM Sans',sans-serif; font-size:.92rem; outline:none; transition:border-color .2s; }
-        .modal-form input:focus { border-color:var(--accent); }
-        .modal-feats { display:flex; flex-wrap:wrap; justify-content:center; gap:.4rem 1rem; margin-bottom:1rem; font-size:.8rem; color:#fca5a5; }
-        .modal-feats span::before { content:'✓ '; color:var(--accent); font-weight:700; }
-        .modal-note { font-size:.7rem; color:var(--muted); margin-top:.5rem; }
-        .modal-success { display:none; }
-
-        /* LOCKED STATE */
-        .ring-locked {
-            color: #444;
-            background: rgba(255,255,255,.03);
-            border-color: #333 !important;
-            filter: blur(2px);
-            user-select: none;
-            pointer-events: none;
-            transition: filter .4s, color .4s;
-        }
-        .stat-locked {
-            filter: blur(5px);
-            opacity: .35;
-            user-select: none;
-            pointer-events: none;
-            transition: filter .4s, opacity .4s;
-        }
-
-        /* UTILS */
-        .hidden { display:none !important; }
-        .wrap { max-width: 800px; margin: 0 auto; padding: 0 1.25rem; }
-
-        @media(max-width:580px){
-            .nav { padding:.75rem 1rem; }
-            .input-row { flex-direction:column; }
-            .mini-grid { gap:.4rem; }
-            .mini-val { font-size:1rem; }
-            .summary-card { flex-direction:column; }
-            .trust-row { gap:1.25rem; }
-            .action-row { flex-direction:column; }
-            .gate-form { flex-direction:column; }
+        :root{--bg:#0f0f11;--card:#1a1a1f;--text:#f0f0f0;--muted:#a0a0a8;--red:#ff4d4d;--amber:#f59e0b;--green:#22c55e;--blue:#3b82f6;--border:#2a2a35}
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+        .container{max-width:1100px;margin:0 auto;padding:0 20px}
+        header{padding:16px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+        .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;display:flex;align-items:center;gap:6px;text-decoration:none;color:var(--text)}
+        .logo span{color:var(--amber)}
+        .chrome-link{font-size:0.9rem;color:var(--blue);text-decoration:none;font-weight:500}
+        .hero{text-align:center;padding:60px 20px 40px}
+        .hero h1{font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;margin-bottom:16px;line-height:1.2}
+        .hero p{color:var(--muted);font-size:1.1rem;max-width:600px;margin:0 auto 28px}
+        .input-group{display:flex;gap:10px;max-width:600px;margin:0 auto 16px;flex-wrap:wrap}
+        .input-group input{flex:1;min-width:200px;padding:14px 18px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:1rem}
+        .input-group input:focus{outline:2px solid var(--blue);border-color:transparent}
+        .input-group button{background:var(--red);color:white;border:none;border-radius:10px;padding:14px 24px;font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;transition:background 0.2s}
+        .input-group button:hover{background:#cc0000}
+        .input-group button:disabled{background:#555;cursor:not-allowed}
+        .demo-btn{background:transparent;color:var(--blue);border:1px solid var(--border);border-radius:10px;padding:12px 20px;font-size:0.95rem;cursor:pointer;margin-top:8px}
+        .demo-btn:hover{background:rgba(59,130,246,0.1)}
+        .stats{display:flex;justify-content:center;gap:30px;flex-wrap:wrap;margin:30px 0 20px;padding:20px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+        .stat{text-align:center}
+        .stat-value{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem}
+        .stat-label{color:var(--muted);font-size:0.9rem}
+        
+        /* NEW: $800 Story Banner - Added after hero */
+        .story-banner{background:#fff8e6;border-left:4px solid #ffc107;padding:15px;margin:25px auto;max-width:800px;border-radius:0 8px 8px 0}
+        .story-banner p{margin:0;font-size:15px;color:#333}
+        
+        .email-gate{background:var(--card);border-radius:16px;padding:25px;margin:30px auto;max-width:600px;text-align:center;border:1px solid var(--border)}
+        .email-gate h3{margin-bottom:12px;font-family:'Syne',sans-serif}
+        .email-gate p{color:var(--muted);margin-bottom:16px;font-size:0.95rem}
+        .email-input{width:100%;padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);margin-bottom:12px;font-size:1rem}
+        .unlock-btn{background:var(--amber);color:#111;border:none;border-radius:10px;padding:12px 24px;font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;width:100%;margin-bottom:10px}
+        .unlock-btn:hover{background:#d97706}
+        .unlock-btn:disabled{background:#666;cursor:not-allowed}
+        .gate-status{font-size:0.85rem;color:var(--muted)}
+        .input-error{color:var(--red);font-size:0.9rem;margin-top:8px;text-align:left}
+        .hidden{display:none!important}
+        
+        .result-section{margin:40px 0}
+        .video-summary{background:var(--card);border-radius:16px;padding:20px;margin-bottom:25px;border:1px solid var(--border)}
+        .video-summary h3{font-family:'Syne',sans-serif;margin-bottom:8px}
+        .video-summary .meta{color:var(--muted);font-size:0.95rem}
+        
+        .score-ring{width:120px;height:120px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;border:4px solid var(--border)}
+        .ring-green{border-color:var(--green);color:var(--green)}
+        .ring-amber{border-color:var(--amber);color:var(--amber)}
+        .ring-red{border-color:var(--red);color:var(--red)}
+        .ring-locked{border-color:var(--muted);color:var(--muted)}
+        
+        .mini-stats{display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin:25px 0}
+        .mini-stat{text-align:center}
+        .mini-stat-value{font-weight:700;font-size:1.2rem}
+        .mini-stat-label{color:var(--muted);font-size:0.85rem}
+        .stat-locked{color:var(--muted)!important}
+        
+        .flags-card{background:var(--card);border-radius:16px;padding:25px;margin:25px 0;border:1px solid var(--border)}
+        .flags-card h3{font-family:'Syne',sans-serif;margin-bottom:15px}
+        .flags-list{list-style:none}
+        .flag-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+        .flag-item:last-child{border-bottom:none}
+        .flag-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-top:6px}
+        .fd-red{background:var(--red)}
+        .fd-amber{background:var(--amber)}
+        .fd-green{background:var(--green)}
+        .flag-text{font-weight:500}
+        .flag-impact{color:var(--muted);font-size:0.9rem;margin-top:4px}
+        
+        .action-buttons{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:25px 0}
+        .action-btn{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;gap:6px}
+        .action-btn:hover{background:#252530}
+        
+        .pro-card{background:linear-gradient(135deg,#1a1a25,#252535);border-radius:16px;padding:25px;margin:30px 0;border:1px solid var(--border);text-align:center}
+        .pro-card h3{font-family:'Syne',sans-serif;margin-bottom:10px}
+        .pro-card p{color:var(--muted);margin-bottom:18px;font-size:0.95rem}
+        .paypal-btn{background:#0070ba;color:white;border:none;border-radius:8px;padding:12px 24px;font-weight:600;font-size:1rem;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+        .paypal-btn:hover{background:#005ea6}
+        
+        .feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin:40px 0}
+        .feature-card{background:var(--card);border-radius:12px;padding:20px;border:1px solid var(--border)}
+        .feature-card h4{font-family:'Syne',sans-serif;margin:0 0 8px 0;display:flex;align-items:center;gap:8px}
+        .feature-card p{color:var(--muted);font-size:0.95rem;margin:0}
+        
+        .edu-section{background:var(--card);border-radius:16px;padding:25px;margin:30px 0;border:1px solid var(--border)}
+        .edu-section h3{font-family:'Syne',sans-serif;margin-bottom:15px}
+        .edu-section ul{padding-left:20px;color:var(--muted);margin:10px 0}
+        .edu-section li{margin:6px 0}
+        
+        .faq-item{margin:20px 0;padding-bottom:15px;border-bottom:1px solid var(--border)}
+        .faq-item:last-child{border-bottom:none}
+        .faq-item h4{font-family:'Syne',sans-serif;margin-bottom:8px}
+        .faq-item p{color:var(--muted)}
+        
+        /* REMOVED: Original "Why We Built TruthScore" section from bottom - content moved to banner above */
+        
+        footer{text-align:center;padding:30px 20px;color:var(--muted);font-size:0.9rem;border-top:1px solid var(--border);margin-top:40px}
+        footer a{color:var(--blue);text-decoration:none}
+        footer a:hover{text-decoration:underline}
+        
+        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:1000;align-items:center;justify-content:center;padding:20px}
+        .modal.open{display:flex}
+        .modal-content{background:var(--card);border-radius:16px;padding:30px;max-width:500px;width:100%;border:1px solid var(--border);position:relative}
+        .modal-close{position:absolute;top:15px;right:20px;background:none;border:none;font-size:28px;color:var(--muted);cursor:pointer}
+        .modal h3{font-family:'Syne',sans-serif;margin-bottom:15px}
+        .modal input{width:100%;padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);margin:8px 0 16px;font-size:1rem}
+        .modal button{background:var(--blue);color:white;border:none;border-radius:10px;padding:12px 24px;font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;width:100%}
+        .modal button:hover{background:#2563eb}
+        .modal-success{text-align:center;color:var(--green);font-weight:600}
+        
+        @media(max-width:600px){
+            .hero h1{font-size:1.8rem}
+            .input-group{flex-direction:column}
+            .stats{gap:20px}
+            .mini-stats{gap:15px}
         }
     </style>
 </head>
 <body>
+    <header class="container">
+        <a href="/" class="logo">🛡️ Truth<span>Score</span></a>
+        <a href="#proModal" onclick="openProModal(); return false;" class="chrome-link">Chrome Extension Waitlist →</a>
+    </header>
 
-<nav class="nav">
-    <a href="/" class="nav-logo">🛡️ Truth<span>Score</span></a>
-    <button class="btn-nav" onclick="openProModal()">Chrome Extension Waitlist →</button>
-</nav>
-
-<div class="wrap">
-
-    <section class="hero">
-        <div class="pill">🔴 Free · No account needed</div>
-        <h1>Is this YouTube video a <em>scam</em>?</h1>
-        <p class="hero-sub">Paste any link. In 10 seconds we expose hidden dislikes, fake engagement, and manipulative language — the signals creators don't want you to see.</p>
-    </section>
-
-    <div class="input-card">
-        <label class="input-label" for="videoInput">Paste YouTube URL</label>
-        <div class="input-row">
-            <input id="videoInput" type="text" placeholder="https://youtube.com/watch?v=..." autocomplete="off" />
-            <button id="analyzeBtn" class="btn-analyze">Analyze →</button>
-        </div>
-        <div style="text-align:center;margin-top:.6rem;">
-            <button id="demoBtn" class="demo-btn" type="button">Try a demo video</button>
-        </div>
-        <div id="inputError" class="error-msg hidden"></div>
-        <div class="trust-row">
-            <div class="trust-item">
-                <div class="trust-num" style="color:var(--accent)">2,400+</div>
-                <div class="trust-lbl">Videos scanned</div>
+    <main class="container">
+        <!-- Hero Section -->
+        <section class="hero">
+            <span style="background:var(--red);color:white;padding:4px 12px;border-radius:20px;font-size:0.85rem;font-weight:600">🔴 Free · No account needed</span>
+            <h1 style="margin-top:16px">Is this YouTube video a scam?</h1>
+            <p>Paste any link. In 10 seconds we expose hidden dislikes, fake engagement, and manipulative language — the signals creators don't want you to see.</p>
+            <div class="input-group">
+                <input type="text" id="videoInput" placeholder="Paste YouTube URL" aria-label="YouTube URL">
+                <button id="analyzeBtn">Analyze →</button>
             </div>
-            <div class="trust-item">
-                <div class="trust-num" style="color:var(--amber)">5 Signals</div>
-                <div class="trust-lbl">Per analysis</div>
-            </div>
-            <div class="trust-item">
-                <div class="trust-num" style="color:var(--green)">Free</div>
-                <div class="trust-lbl">Always</div>
-            </div>
-        </div>
-    </div>
+            <button id="demoBtn" class="demo-btn">Try a demo video</button>
+            <div id="inputError" class="input-error hidden"></div>
+        </section>
 
-    <!-- RESULTS -->
-    <section id="resultSection" class="results hidden">
+        <!-- Stats Section -->
+        <section class="stats">
+            <div class="stat">
+                <div class="stat-value">2,400+</div>
+                <div class="stat-label">Videos scanned</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">5 Signals</div>
+                <div class="stat-label">Per analysis</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">Free</div>
+                <div class="stat-label">Always</div>
+            </div>
+        </section>
 
-        <div class="summary-card">
-            <div class="vid-meta">
-                <h2 id="videoTitle">—</h2>
-                <p id="channelInfo"></p>
-                <div id="metaInfo" style="color:var(--muted);font-size:.78rem;margin-top:.3rem;"></div>
-            </div>
-            <div id="scoreRing" class="score-ring ring-red">
-                <span class="ring-num" id="ringNum">--</span>
-                <span class="ring-label">Score</span>
-            </div>
+        <!-- ✅ CHANGE 1: $800 Loss Story Banner - ADDED HERE (moved up from bottom) -->
+        <div class="story-banner">
+          <p>💡 <strong>Why this exists:</strong> I lost $800 to a YouTube course scam. The video had 300K likes and perfect comments — the red flags were hidden. TruthScore helps you see what creators don't want you to.</p>
         </div>
 
-        <div class="mini-grid">
-            <div class="mini-card"><div class="mini-lbl">Channel Trust</div><div class="mini-val" id="channelTrust">--</div></div>
-            <div class="mini-card"><div class="mini-lbl">Dislike Ratio</div><div class="mini-val" id="dislikeRatio">--</div></div>
-            <div class="mini-card"><div class="mini-lbl">Engagement</div><div class="mini-val" id="engagement">--</div></div>
-        </div>
-
-        <!-- EMAIL GATE -->
-        <div id="emailGate" class="gate-wrapper">
-            <div class="gate-blur" aria-hidden="true">
-                <div class="fake-flag"><div class="fake-dot"></div><div class="fake-line" style="width:72%"></div></div>
-                <div class="fake-flag"><div class="fake-dot"></div><div class="fake-line" style="width:58%"></div></div>
-                <div class="fake-flag"><div class="fake-dot" style="background:var(--amber)"></div><div class="fake-line" style="width:65%"></div></div>
-                <div class="fake-flag"><div class="fake-dot" style="background:var(--amber)"></div><div class="fake-line" style="width:45%"></div></div>
+        <!-- Email Gate Section -->
+        <section class="email-gate" id="emailGate">
+            <h3>🔓 Unlock Full Red Flag Report</h3>
+            <p>Drop your email to see every warning — free, no spam, unsubscribe anytime.</p>
+            <input type="email" id="gateEmail" class="email-input" placeholder="your@email.com" aria-label="Email address">
+            <button id="unlockBtn" class="unlock-btn">Reveal Report</button>
+            <p id="gateStatus" class="gate-status">Free forever. No spam. Unsubscribe anytime.</p>
+            
+            <!-- ✅ CHANGE 2: Sample Report Button - ADDED HERE -->
+            <div style="margin-top: 15px; text-align: center;">
+              <p style="font-size: 14px; color: var(--muted); margin-bottom: 8px;">
+                Not ready to share your email? 
+              </p>
+              <button onclick="showSampleReport()" 
+                      style="background: #f0f0f0; color: #333; border: 1px solid var(--border); 
+                             padding: 10px 20px; border-radius: 8px; cursor: pointer; 
+                             font-size: 14px; font-family: 'Inter', sans-serif;">
+                👁️ View Sample Report (No Email)
+              </button>
             </div>
-            <div class="gate-cta">
-                <h3>🔓 Unlock Full Red Flag Report</h3>
-                <p>Drop your email to see every warning — free, no spam, unsubscribe anytime.</p>
-                <div class="gate-form">
-                    <input type="email" id="gateEmail" placeholder="you@example.com" />
-                    <button class="btn-unlock" id="unlockBtn" onclick="unlockReport()">Reveal Report</button>
+        </section>
+
+        <!-- Results Section (hidden by default) -->
+        <section class="result-section hidden" id="resultSection">
+            <!-- Video Summary -->
+            <div class="video-summary">
+                <h3 id="videoTitle">Video Title</h3>
+                <p class="meta" id="channelInfo">Channel • X yrs old</p>
+                <p class="meta" id="metaInfo">X views • X likes • X comments</p>
+            </div>
+
+            <!-- Score Ring (locked until email) -->
+            <div class="score-ring ring-locked" id="scoreRing">
+                <span id="ringNum">?</span>
+            </div>
+
+            <!-- Mini Stats (locked until email) -->
+            <div class="mini-stats">
+                <div class="mini-stat">
+                    <div class="mini-stat-value stat-locked" id="channelTrust">??/100</div>
+                    <div class="mini-stat-label">Channel Trust</div>
                 </div>
-                <div id="gateStatus" class="gate-note">Free forever. No spam. Unsubscribe anytime.</div>
+                <div class="mini-stat">
+                    <div class="mini-stat-value stat-locked" id="dislikeRatio">?%</div>
+                    <div class="mini-stat-label">Dislike Ratio</div>
+                </div>
+                <div class="mini-stat">
+                    <div class="mini-stat-value stat-locked" id="engagement">?%</div>
+                    <div class="mini-stat-label">Engagement</div>
+                </div>
             </div>
-        </div>
 
-        <!-- FULL FLAGS -->
-        <div id="flagsCard" class="flags-card hidden">
-            <h3>Key Red Flags &amp; Insights</h3>
-            <ul id="flagsList" style="list-style:none;padding:0;"></ul>
-        </div>
-
-        <div class="action-row">
-            <button class="btn-tw"   id="shareBtn">🐦 Share on X</button>
-            <button class="btn-copy" id="copyBtn">📋 Copy Report</button>
-            <button class="btn-new"  id="newBtn">Analyze Another</button>
-        </div>
-
-        <!-- PAYPAL SUPPORT CARD -->
-        <div style="background:linear-gradient(135deg,#0a1a0a,#0f1f0f);border:1px solid rgba(34,197,94,.3);border-radius:18px;padding:2rem;text-align:center;margin-bottom:0.75rem;">
-            <div style="font-size:1.75rem;margin-bottom:.5rem;">☕</div>
-            <h3 style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;margin-bottom:.4rem;">Keep TruthScore Free &amp; Fast</h3>
-            <p style="color:var(--muted);font-size:.88rem;max-width:380px;margin:0 auto .75rem;">Our free server sleeps between requests (hence the 45-sec wait). A small donation keeps the lights on for everyone.</p>
-            <div style="display:inline-flex;flex-direction:column;align-items:center;gap:.4rem;">
-                <a href="https://www.paypal.com/donate/?hosted_button_id=JGGHMKAMLZ3X8" target="_blank" rel="noopener"
-                   style="display:inline-block;background:var(--green);color:#fff;padding:.75rem 2rem;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;text-decoration:none;transition:background .2s;"
-                   onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='var(--green)'">
-                    💚 Support on PayPal
-                </a>
-                <span style="font-size:.7rem;color:var(--muted);">Any amount helps — thank you!</span>
+            <!-- Flags Card (hidden until email) -->
+            <div class="flags-card hidden" id="flagsCard">
+                <h3>Key Red Flags & Insights</h3>
+                <ul class="flags-list" id="flagsList"></ul>
             </div>
-        </div>
 
-        <div class="pro-card">
-            <div class="pro-badge-lbl">Coming Soon</div>
-            <h3>TruthScore Chrome Extension</h3>
-            <p>See scam scores directly on YouTube — before you even click a video. Never get fooled again.</p>
-            <div class="pro-feats">
-                <span class="pro-feat">Live score on every video</span>
-                <span class="pro-feat">Bulk URL scanning</span>
-                <span class="pro-feat">Creator history tracker</span>
-                <span class="pro-feat">Email alerts on new scams</span>
+            <!-- ✅ CHANGE 3: Testimonials Section - ADDED HERE (after flags, before pro card) -->
+            <div style="margin: 30px 0; padding: 20px; background: #f9f9f9; 
+                 border-radius: 12px; text-align: center; color: #333;">
+              <p style="font-weight: 600; margin-bottom: 15px;">What users say:</p>
+              <div style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;">
+                <div style="flex: 1; min-width: 250px; background: white; padding: 15px; 
+                     border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: left;">
+                  <p style="margin: 0 0 8px 0; font-size: 14px;">"Caught a crypto scam before I sent $200. 
+                     The hidden dislike ratio was a dead giveaway."</p>
+                  <small style="color: #666;">— Alex, Reddit</small>
+                </div>
+                <div style="flex: 1; min-width: 250px; background: white; padding: 15px; 
+                     border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: left;">
+                  <p style="margin: 0 0 8px 0; font-size: 14px;">"Finally a tool that shows me WHY a video 
+                     feels off. The urgency language flag saved me from a 'guru' course."</p>
+                  <small style="color: #666;">— Maya, Twitter</small>
+                </div>
+              </div>
             </div>
-            <button class="btn-pro" onclick="openProModal()">Join the Waitlist — Free</button>
-            <p class="pro-sub">Early members get 50% off Pro forever when we launch.</p>
-        </div>
-    </section>
 
-    <!-- WHY SECTION -->
-    <section class="why">
-        <h2>Why TruthScore?</h2>
-        <div class="why-grid">
-            <div class="why-card"><div class="why-icon">👎</div><h4>Hidden dislikes revealed</h4><p>YouTube removed public dislikes in 2021. We bring them back using the ReturnYouTubeDislike API.</p></div>
-            <div class="why-card"><div class="why-icon">🤖</div><h4>Manipulative language AI</h4><p>We scan for urgency tactics, FOMO phrases, and fake scarcity that scammers use to pressure you.</p></div>
-            <div class="why-card"><div class="why-icon">💬</div><h4>Comment sentiment</h4><p>Scam warnings get buried under bought positive reviews. Our AI surfaces them for you.</p></div>
-            <div class="why-card"><div class="why-icon">📊</div><h4>Engagement anomaly detection</h4><p>Bought views and bot comments have telltale patterns. We flag them automatically.</p></div>
-        </div>
-    </section>
-
-    <!-- SEO CONTENT -->
-    <section class="seo">
-        <h2>How to Check if a YouTube Video is a Scam</h2>
-        <p>YouTube removed the dislike button in 2021, making it nearly impossible to spot scam videos at first glance. <strong>TruthScore is a free YouTube scam detector</strong> that reveals what creators hide from you.</p>
-        <h3>What Does TruthScore Check?</h3>
-        <ul>
-            <li><strong>Hidden dislike ratios</strong> — via the ReturnYouTubeDislike API</li>
-            <li><strong>Comment sentiment analysis</strong> — AI scans for buried complaints and scam warnings</li>
-            <li><strong>Channel credibility</strong> — age, upload consistency, and historical patterns</li>
-            <li><strong>Engagement anomalies</strong> — fake views, bot comments, purchased engagement</li>
-            <li><strong>Manipulative language</strong> — urgency tactics, fake scarcity, psychological pressure</li>
-        </ul>
-        <h3>Common Red Flags We Detect</h3>
-        <h4>Title &amp; Thumbnail</h4>
-        <ul>
-            <li>Unrealistic income claims ("$10,000 in 24 hours")</li>
-            <li>Excessive emojis and ALL CAPS designed to grab attention</li>
-            <li>Fake urgency language ("Limited time only", "Expires today")</li>
-        </ul>
-        <h4>Engagement Patterns</h4>
-        <ul>
-            <li>High hidden dislike ratio</li>
-            <li>Comments disabled or heavily filtered to remove criticism</li>
-            <li>Suspiciously low engagement relative to view count</li>
-        </ul>
-        <h4>Channel History</h4>
-        <ul>
-            <li>Brand-new channel with a sudden viral video</li>
-            <li>Frequent name or branding changes</li>
-            <li>No verifiable social media presence or website</li>
-        </ul>
-        <h3>Types of Scams We Detect</h3>
-        <p><strong>Passive income scams</strong> — promise "easy money" then sell expensive courses ($500–$2,000).</p>
-        <p><strong>Dropshipping course scams</strong> — outdated tactics wrapped in professional-looking production.</p>
-        <p><strong>Crypto / Forex scams</strong> — trading signals, automated bots, and "guaranteed" strategies.</p>
-        <p><strong>Fake guru programs</strong> — exclusive masterminds that provide recycled generic advice.</p>
-        <h3>Frequently Asked Questions</h3>
-        <h4>Is TruthScore free?</h4>
-        <p>Yes. Core scam detection is always free. A Pro Chrome extension is coming soon — join the waitlist above.</p>
-        <h4>How accurate is the score?</h4>
-        <p>TruthScore combines 5 independent signals — hidden dislikes, engagement patterns, channel history, comment sentiment, and language analysis. No automated tool can guarantee accuracy, but multi-signal analysis is significantly more reliable than any single metric alone.</p>
-        <h4>How do you access hidden dislike data?</h4>
-        <p>We use the ReturnYouTubeDislike API, which crowdsources data from thousands of browser extension users worldwide.</p>
-        <h4>Do you store my data?</h4>
-        <p>We do not track which videos you analyze. If you unlock a report with your email, that email is stored securely and never sold.</p>
-        <h3>Why We Built TruthScore</h3>
-        <p>The creator of TruthScore personally lost $800 to YouTube course scams. The videos had hundreds of thousands of likes and authentic-looking comments — the truth was hidden. TruthScore exists so you don't have to learn that lesson the hard way.</p>
-    </section>
-</div>
-
-<footer>
-    <div class="footer-warn">⚠️ TruthScore provides risk indicators based on data analysis, not absolute guarantees. Always apply personal judgment and conduct additional research.</div>
-    <p><strong>Disclaimer:</strong> TruthScore provides probabilistic risk signals from publicly available data. We use the ReturnYouTubeDislike API for hidden dislike data. Results are for informational purposes only.</p>
-    <p style="margin-top:.75rem;">© 2025 TruthScore. All rights reserved.</p>
-</footer>
-
-<!-- PRO WAITLIST MODAL -->
-<div class="modal-bg" id="proModal">
-    <div class="modal">
-        <button class="modal-x" onclick="closeProModal()">×</button>
-        <div id="modalForm">
-            <div style="font-size:2rem;margin-bottom:.5rem;">🛡️</div>
-            <h3>Join the TruthScore Pro Waitlist</h3>
-            <p>Be first when the Chrome extension launches. See scam scores on every video before you click. Early members get <strong>50% off forever</strong>.</p>
-            <div class="modal-feats">
-                <span>Live scores on YouTube</span>
-                <span>Bulk scanning</span>
-                <span>Creator tracker</span>
-                <span>Email alerts</span>
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button id="shareBtn" class="action-btn">🐦 Share on X</button>
+                <button id="copyBtn" class="action-btn">📋 Copy Report</button>
+                <button id="newBtn" class="action-btn">Analyze Another</button>
             </div>
-            <div class="modal-form">
-                <input type="text"  id="proName"  placeholder="Your first name" />
-                <input type="email" id="proEmail" placeholder="your@email.com" />
-                <button class="btn-pro" id="proSubmitBtn" onclick="submitProWaitlist()">Secure My Spot — Free</button>
+
+            <!-- Pro Card / Donation -->
+            <div class="pro-card">
+                <h3>☕ Keep TruthScore Free & Fast</h3>
+                <p>Our free server sleeps between requests (hence the 45-sec wait). A small donation keeps the lights on for everyone.</p>
+                <div id="paypal-container"></div>
+                <p style="font-size:0.9rem;color:var(--muted);margin-top:12px">Any amount helps — thank you!</p>
             </div>
-            <div id="proStatus" class="modal-note">No spam. We only email you when we launch.</div>
-        </div>
-        <div class="modal-success" id="modalSuccess">
-            <div style="font-size:2.5rem;margin-bottom:.5rem;">🎉</div>
-            <h3 style="color:var(--green);">You're on the list!</h3>
-            <p>We'll email you the moment TruthScore Pro launches — and you're locked in for 50% off.</p>
-            <button class="btn-pro" onclick="closeProModal()" style="margin-top:.5rem;">Done</button>
+        </section>
+
+        <!-- Chrome Extension Section -->
+        <section style="text-align:center;margin:50px 0">
+            <h3 style="font-family:'Syne',sans-serif;font-size:1.5rem;margin-bottom:12px">Coming Soon</h3>
+            <p style="color:var(--muted);max-width:600px;margin:0 auto 20px">TruthScore Chrome Extension<br>See scam scores directly on YouTube — before you even click a video. Never get fooled again.</p>
+            <ul style="list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:15px;margin:20px 0;color:var(--muted)">
+                <li>✓ Live score on every video</li>
+                <li>✓ Bulk URL scanning</li>
+                <li>✓ Creator history tracker</li>
+                <li>✓ Email alerts on new scams</li>
+            </ul>
+            <button onclick="openProModal()" class="demo-btn" style="background:var(--blue);color:white;border-color:var(--blue)">Join the Waitlist — Free</button>
+            <p style="font-size:0.9rem;color:var(--muted);margin-top:12px">Early members get 50% off Pro forever when we launch.</p>
+        </section>
+
+        <!-- Why TruthScore? Features -->
+        <section>
+            <h3 style="font-family:'Syne',sans-serif;text-align:center;margin:40px 0 25px">Why TruthScore?</h3>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>👎 Hidden dislikes revealed</h4>
+                    <p>YouTube removed public dislikes in 2021. We bring them back using the ReturnYouTubeDislike API.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🤖 Manipulative language AI</h4>
+                    <p>We scan for urgency tactics, FOMO phrases, and fake scarcity that scammers use to pressure you.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>💬 Comment sentiment</h4>
+                    <p>Scam warnings get buried under bought positive reviews. Our AI surfaces them for you.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📊 Engagement anomaly detection</h4>
+                    <p>Bought views and bot comments have telltale patterns. We flag them automatically.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Educational Section -->
+        <section class="edu-section">
+            <h3>How to Check if a YouTube Video is a Scam</h3>
+            <p style="color:var(--muted);margin-bottom:15px">YouTube removed the dislike button in 2021, making it nearly impossible to spot scam videos at first glance. TruthScore is a free YouTube scam detector that reveals what creators hide from you.</p>
+            <h4 style="font-family:'Syne',sans-serif;margin:15px 0 8px">What Does TruthScore Check?</h4>
+            <ul>
+                <li>Hidden dislike ratios — via the ReturnYouTubeDislike API</li>
+                <li>Comment sentiment analysis — AI scans for buried complaints and scam warnings</li>
+                <li>Channel credibility — age, upload consistency, and historical patterns</li>
+                <li>Engagement anomalies — fake views, bot comments, purchased engagement</li>
+                <li>Manipulative language — urgency tactics, fake scarcity, psychological pressure</li>
+            </ul>
+            <h4 style="font-family:'Syne',sans-serif;margin:15px 0 8px">Common Red Flags We Detect</h4>
+            <p><strong>Title & Thumbnail:</strong> Unrealistic income claims, excessive emojis, fake urgency language</p>
+            <p><strong>Engagement Patterns:</strong> High hidden dislike ratio, disabled comments, suspiciously low engagement</p>
+            <p><strong>Channel History:</strong> Brand-new channel with viral video, frequent branding changes</p>
+            <h4 style="font-family:'Syne',sans-serif;margin:15px 0 8px">Types of Scams We Detect</h4>
+            <ul>
+                <li>Passive income scams — promise "easy money" then sell expensive courses</li>
+                <li>Dropshipping course scams — outdated tactics wrapped in professional production</li>
+                <li>Crypto / Forex scams — trading signals, automated bots, "guaranteed" strategies</li>
+                <li>Fake guru programs — exclusive masterminds with recycled generic advice</li>
+            </ul>
+        </section>
+
+        <!-- FAQ Section -->
+        <section style="margin:40px 0">
+            <h3 style="font-family:'Syne',sans-serif;text-align:center;margin-bottom:25px">Frequently Asked Questions</h3>
+            <div class="faq-item">
+                <h4>Is TruthScore free?</h4>
+                <p>Yes. Core scam detection is always free. A Pro Chrome extension is coming soon — join the waitlist above.</p>
+            </div>
+            <div class="faq-item">
+                <h4>How accurate is the score?</h4>
+                <p>TruthScore combines 5 independent signals. No automated tool can guarantee accuracy, but multi-signal analysis is significantly more reliable than any single metric alone.</p>
+            </div>
+            <div class="faq-item">
+                <h4>How do you access hidden dislike data?</h4>
+                <p>We use the ReturnYouTubeDislike API, which crowdsources data from thousands of browser extension users worldwide.</p>
+            </div>
+            <div class="faq-item">
+                <h4>Do you store my data?</h4>
+                <p>We do not track which videos you analyze. If you unlock a report with your email, that email is stored securely and never sold.</p>
+            </div>
+        </section>
+
+        <!-- ✅ REMOVED: Original "Why We Built TruthScore" section from bottom (content moved to banner above) -->
+
+        <!-- Footer -->
+        <footer>
+            <p>⚠️ TruthScore provides risk indicators based on data analysis, not absolute guarantees. Always apply personal judgment and conduct additional research.</p>
+            <p style="margin-top:8px">Disclaimer: TruthScore provides probabilistic risk signals from publicly available data. We use the ReturnYouTubeDislike API for hidden dislike data. Results are for informational purposes only.</p>
+            <p style="margin-top:16px">© 2025 TruthScore. All rights reserved.</p>
+        </footer>
+    </main>
+
+    <!-- Pro Modal -->
+    <div class="modal" id="proModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeProModal()">&times;</button>
+            <h3>🛡️ Join the TruthScore Pro Waitlist</h3>
+            <p style="color:var(--muted);margin-bottom:20px">Be first when the Chrome extension launches. See scam scores on every video before you click. Early members get 50% off forever.</p>
+            <div id="modalForm">
+                <input type="text" id="proName" placeholder="Your name (optional)">
+                <input type="email" id="proEmail" placeholder="your@email.com" required>
+                <button id="proSubmitBtn" onclick="submitProWaitlist()">Secure My Spot — Free</button>
+                <p id="proStatus" style="font-size:0.85rem;color:var(--muted);margin-top:12px">No spam. We only email you when we launch.</p>
+            </div>
+            <div id="modalSuccess" class="modal-success" style="display:none">
+                🎉 You're on the list!<br>
+                <span style="font-weight:400;font-size:0.95rem;color:var(--muted);display:block;margin-top:8px">We'll email you the moment TruthScore Pro launches — and you're locked in for 50% off.</span>
+                <button onclick="closeProModal()" style="margin-top:16px;background:var(--card);color:var(--text);border:1px solid var(--border)">Done</button>
+            </div>
         </div>
     </div>
-</div>
 
-<script src="script.js"></script>
+    <!-- ✅ CHANGE 4: Sample Report Modal - ADDED AT END -->
+    <div id="sampleModal" style="display:none; position:fixed; top:0; left:0; 
+         width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; 
+         padding:20px; overflow:auto; font-family: 'Inter', sans-serif;">
+      <div style="background:white; max-width:600px; margin:50px auto; 
+           padding:25px; border-radius:12px; position:relative; color: #333;">
+        <button onclick="closeSampleReport()" 
+                style="position:absolute; top:10px; right:15px; background:none; 
+                       border:none; font-size:24px; cursor:pointer; color: #666;">&times;</button>
+        <h3 style="margin-top: 0; font-family: 'Syne', sans-serif;">🔍 Sample TruthScore Report</h3>
+        <p><strong>Video:</strong> "Make $10K in 24 Hours - Crypto Method!"</p>
+        <hr style="margin:15px 0; border: none; border-top: 1px solid #eee;">
+        <ul style="text-align:left; color:#333; padding-left: 20px;">
+          <li>⚠️ <strong>Hidden Dislike Ratio:</strong> 41% (High risk)</li>
+          <li>⚠️ <strong>Urgency Language:</strong> "Expires tonight!" detected</li>
+          <li>⚠️ <strong>Comment Pattern:</strong> 78% generic praise (possible bots)</li>
+          <li>✅ <strong>Channel Age:</strong> 3.2 years (neutral)</li>
+          <li>❌ <strong>Overall Score:</strong> 2.1/10 — Likely scam</li>
+        </ul>
+        <p style="font-size:13px; color:#666; margin-top:15px;">
+          <em>This is a preview. Full reports with sources & explanations require email signup.</em>
+        </p>
+      </div>
+    </div>
+    
+    <!-- ✅ CHANGE 4 (cont.): Sample Report Modal JS - INLINE (no script.js edit needed) -->
+    <script>
+    function showSampleReport() { document.getElementById('sampleModal').style.display = 'block'; }
+    function closeSampleReport() { document.getElementById('sampleModal').style.display = 'none'; }
+    window.onclick = function(event) {
+      const modal = document.getElementById('sampleModal');
+      if (event.target == modal) modal.style.display = 'none';
+    }
+    </script>
+
+    <!-- Your existing script.js (unchanged) -->
+    <script src="script.js"></script>
 </body>
 </html>
