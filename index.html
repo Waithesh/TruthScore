@@ -117,6 +117,13 @@
         .modal button:hover{background:#2563eb}
         .modal-success{text-align:center;color:var(--green);font-weight:600}
         
+        /* Locked state styles */
+        .ring-locked{border-color:var(--muted)!important;color:var(--muted)!important;filter:blur(2px);user-select:none}
+        .stat-locked{filter:blur(4px);user-select:none;cursor:not-allowed}
+
+        /* Pro tier badge */
+        .pro-badge{display:inline-block;background:linear-gradient(135deg,#f59e0b,#d97706);color:#111;font-size:0.75rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:middle}
+
         @media(max-width:600px){
             .hero h1{font-size:1.8rem}
             .input-group{flex-direction:column}
@@ -251,12 +258,20 @@
                 <button id="newBtn" class="action-btn">Analyze Another</button>
             </div>
 
-            <!-- Pro Card / Donation -->
+            <!-- Pro Card / PayPal -->
             <div class="pro-card">
-                <h3>☕ Keep TruthScore Free & Fast</h3>
-                <p>Our free server sleeps between requests (hence the 45-sec wait). A small donation keeps the lights on for everyone.</p>
-                <div id="paypal-container"></div>
-                <p style="font-size:0.9rem;color:var(--muted);margin-top:12px">Any amount helps — thank you!</p>
+                <h3>⚡ TruthScore Pro <span class="pro-badge">$9/month</span></h3>
+                <p style="margin-bottom:6px">Unlimited analyses · No email gate · Full flag breakdown · Priority speed</p>
+                <p style="font-size:0.85rem;color:var(--muted);margin-bottom:18px">Also keeps the free tier alive for everyone — thank you 🙏</p>
+                <!-- PayPal Hosted Button -->
+                <div id="paypal-container-REPLACE_BUTTON_ID"></div>
+                <script src="https://www.paypal.com/sdk/js?client-id=BAAHVQb6e24ePOj6Gcjx6n8K66OfYZTH76okeWOOtV8G6fUpyG9ZjkPsniOrOhWOJOLDpLzUOj1lvAQ6Sg&components=hosted-buttons&disable-funding=venmo&currency=USD"></script>
+                <script>
+                  paypal.HostedButtons({
+                    hostedButtonId: "REPLACE_BUTTON_ID",
+                  }).render("#paypal-container-REPLACE_BUTTON_ID")
+                </script>
+                <p style="font-size:0.85rem;color:var(--muted);margin-top:14px">Cancel anytime. Secure checkout via PayPal.</p>
             </div>
         </section>
 
@@ -349,7 +364,7 @@
         <footer>
             <p>⚠️ TruthScore provides risk indicators based on data analysis, not absolute guarantees. Always apply personal judgment and conduct additional research.</p>
             <p style="margin-top:8px">Disclaimer: TruthScore provides probabilistic risk signals from publicly available data. We use the ReturnYouTubeDislike API for hidden dislike data. Results are for informational purposes only.</p>
-            <p style="margin-top:16px">© 2025 TruthScore. All rights reserved.</p>
+            <p style="margin-top:16px">© 2026 TruthScore. All rights reserved.</p>
         </footer>
     </main>
 
