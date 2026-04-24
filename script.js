@@ -6,8 +6,8 @@
 const BACKEND_URL   = 'https://truthscore.onrender.com';
 const DEMO_VIDEO_ID = 'dQw4w9WgXcQ';
 const SHEETS_URL    = 'https://script.google.com/macros/s/AKfycbz_Gm3jeFFj8WzWatTj5CHegqFX1rtbosTsz2jEkMpwyAcZrTmkdNXb6bLMCH1LqmmN/exec';
-const PAYPAL_BTN    = 'JGGHMKAMLZ3X8';
-const PAYPAL_KEY    = 'BAAN-6uTeFePPlFBTb2KRwscuk_CN958_Dp1xPe78I33ZlxbgpQfjilAnXMcrm02M5iYbM9Xr2EnqAwPXs';
+// PayPal hosted button is now injected directly in index.html
+
 const LS_KEY        = 'ts_email_given'; // localStorage key for returning users
 
 // ── UTILS ────────────────────────────────────────
@@ -53,7 +53,6 @@ let _score  = null;   // number or null
 let _title  = '';
 let _report = '';
 let _flags  = [];
-let _ppDone = false;
 
 // ── BOOT ─────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -280,7 +279,6 @@ function renderResults(payload) {
   }
 
   $('resultSection')?.classList.remove('hidden');
-  injectPayPal();
   window.scrollTo({ top: ($('resultSection')?.offsetTop || 300) - 80, behavior: 'smooth' });
 }
 
@@ -449,21 +447,3 @@ window.openProModal      = openProModal;
 window.closeProModal     = closeProModal;
 window.submitProWaitlist = submitProWaitlist;
 window.unlockReport      = unlockReport;
-
-// ── PAYPAL ────────────────────────────────────────
-function injectPayPal() {
-  if (_ppDone) return;
-  const proCard = $q('.pro-card'); if (!proCard) return;
-  const wrap = document.createElement('div');
-  wrap.style.cssText = 'margin:.75rem 0;display:flex;justify-content:center;';
-  const container = document.createElement('div'); container.id = 'paypal-ts-btn';
-  wrap.appendChild(container);
-  proCard.insertBefore(wrap, proCard.querySelector('.pro-sub') || null);
-  const s = document.createElement('script');
-  s.src = 'https://www.paypal.com/sdk/js?client-id=' + PAYPAL_KEY + '&components=hosted-buttons&disable-funding=venmo&currency=USD';
-  s.onload = () => {
-    window.paypal?.HostedButtons?.({ hostedButtonId: PAYPAL_BTN }).render('#paypal-ts-btn');
-    _ppDone = true;
-  };
-  document.body.appendChild(s);
-}
