@@ -272,7 +272,9 @@
                   <span style="background:rgba(255,255,255,0.06);padding:6px 14px;border-radius:20px;font-size:0.9rem">✅ Priority speed</span>
                 </div>
                 <!-- PayPal Hosted Button -->
-                <div id="paypal-container-RJ2LE5FD4KN8C" style="margin:0 auto 16px;display:flex;justify-content:center;min-height:50px"></div>
+                <div style="width:100%;max-width:300px;margin:0 auto 16px;overflow:hidden">
+                  <div id="paypal-container-RJ2LE5FD4KN8C"></div>
+                </div>
                 <script src="https://www.paypal.com/sdk/js?client-id=BAAHVQb6e24ePOj6Gcjx6n8K66OfYZTH76okeWOOtV8G6fUpyG9ZjkPsniOrOhWOJOLDpLzUOj1lvAQ6Sg&components=hosted-buttons&disable-funding=venmo&currency=USD"></script>
                 <script>
                   paypal.HostedButtons({
@@ -448,19 +450,10 @@
         <!-- Benefits -->
         <p style="color:#a0a0a8;font-size:0.95rem;margin:14px 0 6px">Unlimited analyses · No email gate<br>Full flag breakdown · Priority speed</p>
         <p style="color:#a0a0a8;font-size:0.85rem;margin-bottom:20px">Also keeps the free tier alive for everyone — thank you 🙏</p>
-        <!-- PayPal button rendered here -->
-        <div id="paypal-container-popup-RJ2LE5FD4KN8C" style="display:flex;justify-content:center;min-height:50px;margin-bottom:14px"></div>
-        <script>
-          (function tryRenderPopupBtn() {
-            if (window.paypal && window.paypal.HostedButtons) {
-              window.paypal.HostedButtons({
-                hostedButtonId: "RJ2LE5FD4KN8C"
-              }).render("#paypal-container-popup-RJ2LE5FD4KN8C");
-            } else {
-              setTimeout(tryRenderPopupBtn, 500);
-            }
-          })();
-        </script>
+        <!-- Upgrade CTA button — links to pro card on page -->
+        <a href="#paypal-container-RJ2LE5FD4KN8C" onclick="closeProPopup()" style="display:block;background:#f59e0b;color:#111;font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;padding:14px 24px;border-radius:12px;text-decoration:none;margin-bottom:10px">
+          ⚡ Get Pro — $9/month
+        </a>
         <p style="font-size:0.8rem;color:#555;margin-top:6px">🔒 Secure checkout via PayPal · Cancel anytime</p>
         <!-- Dismiss link -->
         <div style="margin-top:16px">
