@@ -80,9 +80,9 @@
         .action-btn{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;gap:6px}
         .action-btn:hover{background:#252530}
         
-        .pro-card{background:linear-gradient(135deg,#1a1a25,#252535);border-radius:16px;padding:25px;margin:30px 0;border:1px solid var(--border);text-align:center}
-        .pro-card h3{font-family:'Syne',sans-serif;margin-bottom:10px}
-        .pro-card p{color:var(--muted);margin-bottom:18px;font-size:0.95rem}
+        .pro-card{background:linear-gradient(135deg,#1a1a25,#252535);border-radius:20px;padding:40px 30px;margin:40px 0;border:2px solid var(--amber);text-align:center;box-shadow:0 0 40px rgba(245,158,11,0.15)}
+        .pro-card h3{font-family:'Syne',sans-serif;margin-bottom:14px;font-size:1.6rem}
+        .pro-card p{color:var(--muted);margin-bottom:14px;font-size:1rem}
         .paypal-btn{background:#0070ba;color:white;border:none;border-radius:8px;padding:12px 24px;font-weight:600;font-size:1rem;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
         .paypal-btn:hover{background:#005ea6}
         
@@ -260,18 +260,27 @@
 
             <!-- Pro Card / PayPal -->
             <div class="pro-card">
-                <h3>⚡ TruthScore Pro <span class="pro-badge">$9/month</span></h3>
-                <p style="margin-bottom:6px">Unlimited analyses · No email gate · Full flag breakdown · Priority speed</p>
-                <p style="font-size:0.85rem;color:var(--muted);margin-bottom:18px">Also keeps the free tier alive for everyone — thank you 🙏</p>
+                <div style="margin-bottom:8px">
+                  <span style="background:var(--amber);color:#111;font-size:0.8rem;font-weight:700;padding:3px 12px;border-radius:20px;letter-spacing:0.05em">PRO</span>
+                </div>
+                <h3 style="font-size:1.8rem;margin-bottom:6px">⚡ TruthScore Pro</h3>
+                <div style="font-size:2.2rem;font-family:'Syne',sans-serif;font-weight:800;color:var(--amber);margin:10px 0">$9<span style="font-size:1rem;color:var(--muted);font-weight:400">/month</span></div>
+                <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:18px 0 24px">
+                  <span style="background:rgba(255,255,255,0.06);padding:6px 14px;border-radius:20px;font-size:0.9rem">✅ Unlimited analyses</span>
+                  <span style="background:rgba(255,255,255,0.06);padding:6px 14px;border-radius:20px;font-size:0.9rem">✅ No email gate</span>
+                  <span style="background:rgba(255,255,255,0.06);padding:6px 14px;border-radius:20px;font-size:0.9rem">✅ Full flag breakdown</span>
+                  <span style="background:rgba(255,255,255,0.06);padding:6px 14px;border-radius:20px;font-size:0.9rem">✅ Priority speed</span>
+                </div>
                 <!-- PayPal Hosted Button -->
-                <div id="paypal-container-REPLACE_BUTTON_ID"></div>
+                <div id="paypal-container-RJ2LE5FD4KN8C" style="margin:0 auto 16px;display:flex;justify-content:center;min-height:50px"></div>
                 <script src="https://www.paypal.com/sdk/js?client-id=BAAHVQb6e24ePOj6Gcjx6n8K66OfYZTH76okeWOOtV8G6fUpyG9ZjkPsniOrOhWOJOLDpLzUOj1lvAQ6Sg&components=hosted-buttons&disable-funding=venmo&currency=USD"></script>
                 <script>
                   paypal.HostedButtons({
-                    hostedButtonId: "REPLACE_BUTTON_ID",
-                  }).render("#paypal-container-REPLACE_BUTTON_ID")
+                    hostedButtonId: "RJ2LE5FD4KN8C",
+                  }).render("#paypal-container-RJ2LE5FD4KN8C")
                 </script>
-                <p style="font-size:0.85rem;color:var(--muted);margin-top:14px">Cancel anytime. Secure checkout via PayPal.</p>
+                <p style="font-size:0.85rem;color:var(--muted);margin-top:8px">🔒 Secure checkout via PayPal · Cancel anytime</p>
+                <p style="font-size:0.8rem;color:#555;margin-top:6px">Also keeps the free tier alive for everyone 🙏</p>
             </div>
         </section>
 
