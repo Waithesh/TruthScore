@@ -280,6 +280,7 @@ function renderResults(payload) {
 
   $('resultSection')?.classList.remove('hidden');
   window.scrollTo({ top: ($('resultSection')?.offsetTop || 300) - 80, behavior: 'smooth' });
+  scheduleProPopup(); // trigger popup 5 sec after results appear
 }
 
 // ── REVEAL LOCKED UI (score + stats) ─────────────
@@ -447,3 +448,45 @@ window.openProModal      = openProModal;
 window.closeProModal     = closeProModal;
 window.submitProWaitlist = submitProWaitlist;
 window.unlockReport      = unlockReport;
+
+// ── PRO UPGRADE POPUP ─────────────────────────────
+// Appears 5 seconds after results load
+// Never shows again within 24 hours
+// Never shows if user is already Pro
+
+const POPUP_KEY        = 'ts_popup_dismissed'; // localStorage key
+const POPUP_COOLDOWN   = 24 * 60 * 60 * 1000; // 24 hours in ms
+const PRO_KEY          = 'ts_is_pro';          // set this when user pays
+
+function shouldShowProPopup() {
+  // Never show to Pro members
+  try { if (localStorage.getItem(PRO_KEY)) return false; } catch(e) {}
+  // Check cooldown — don't show if dismissed within 24 hours
+  try {
+    const dismissed = localStorage.getItem(POPUP_KEY);
+    if (dismissed && Date.now() - parseInt(dismissed) < POPUP_COOLDOWN) return false;
+  } catch(e) {}
+  return true;
+}
+
+function showProPopup() {
+  if (!shouldShowProPopup()) return;
+  const popup = $('proPopup');
+  if (!popup) return;
+  popup.style.display = 'flex';
+}
+
+function closeProPopup() {
+  const popup = $('proPopup');
+  if (popup) popup.style.display = 'none';
+  // Record dismissal time so it won't show again for 24 hours
+  try { localStorage.setItem(POPUP_KEY, String(Date.now())); } catch(e) {}
+}
+window.closeProPopup = closeProPopup;
+
+// Call this after results render — hooked into renderResults below
+function scheduleProPopup() {
+  if (!shouldShowProPopup()) return;
+  setTimeout(showProPopup, 5000); // 5 seconds after results appear
+}
+window.scheduleProPopup = scheduleProPopup;
