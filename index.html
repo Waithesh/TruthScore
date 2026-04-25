@@ -432,6 +432,43 @@
     }
     </script>
 
+
+    <!-- ── Pro Upgrade Popup (appears 5 sec after results) ── -->
+    <div id="proPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:9999;align-items:center;justify-content:center;padding:20px">
+      <div style="background:#1a1a1f;border:2px solid #f59e0b;border-radius:20px;padding:36px 28px;max-width:420px;width:100%;text-align:center;position:relative;box-shadow:0 0 60px rgba(245,158,11,0.2)">
+        <!-- Close button -->
+        <button onclick="closeProPopup()" style="position:absolute;top:12px;right:16px;background:none;border:none;color:#a0a0a8;font-size:24px;cursor:pointer;line-height:1">&times;</button>
+        <!-- Badge -->
+        <div style="margin-bottom:10px">
+          <span style="background:#f59e0b;color:#111;font-size:0.75rem;font-weight:700;padding:3px 14px;border-radius:20px;letter-spacing:0.06em">PRO</span>
+        </div>
+        <!-- Heading -->
+        <h3 style="font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;margin-bottom:6px;color:#f0f0f0">⚡ TruthScore Pro</h3>
+        <div style="font-size:2rem;font-family:'Syne',sans-serif;font-weight:800;color:#f59e0b;margin:8px 0">$9<span style="font-size:1rem;color:#a0a0a8;font-weight:400">/month</span></div>
+        <!-- Benefits -->
+        <p style="color:#a0a0a8;font-size:0.95rem;margin:14px 0 6px">Unlimited analyses · No email gate<br>Full flag breakdown · Priority speed</p>
+        <p style="color:#a0a0a8;font-size:0.85rem;margin-bottom:20px">Also keeps the free tier alive for everyone — thank you 🙏</p>
+        <!-- PayPal button rendered here -->
+        <div id="paypal-container-popup-RJ2LE5FD4KN8C" style="display:flex;justify-content:center;min-height:50px;margin-bottom:14px"></div>
+        <script>
+          (function tryRenderPopupBtn() {
+            if (window.paypal && window.paypal.HostedButtons) {
+              window.paypal.HostedButtons({
+                hostedButtonId: "RJ2LE5FD4KN8C"
+              }).render("#paypal-container-popup-RJ2LE5FD4KN8C");
+            } else {
+              setTimeout(tryRenderPopupBtn, 500);
+            }
+          })();
+        </script>
+        <p style="font-size:0.8rem;color:#555;margin-top:6px">🔒 Secure checkout via PayPal · Cancel anytime</p>
+        <!-- Dismiss link -->
+        <div style="margin-top:16px">
+          <button onclick="closeProPopup()" style="background:none;border:none;color:#555;font-size:0.85rem;cursor:pointer;text-decoration:underline">No thanks, keep it free</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Your existing script.js (unchanged) -->
     <script src="script.js"></script>
 </body>
