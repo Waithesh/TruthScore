@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — TruthScore</title>
+<style>
+  :root{--bg:#080808;--fg:#f0f0f0;--muted:#999;--border:#1e1e1e;--blue:#3b82f6}
+  body{background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+       max-width:760px;margin:0 auto;padding:50px 20px 80px;line-height:1.6}
+  h1{font-size:1.9rem;margin-bottom:6px}
+  .updated{color:var(--muted);font-size:0.9rem;margin-bottom:36px}
+  h2{font-size:1.2rem;margin-top:36px;margin-bottom:10px;border-top:1px solid var(--border);padding-top:24px}
+  p,li{color:#ccc}
+  a{color:var(--blue)}
+  code{background:#151515;padding:1px 6px;border-radius:4px;font-size:0.9em}
+  ul{padding-left:20px}
+</style>
+</head>
+<body>
+  <h1>Privacy Policy</h1>
+  <p class="updated">Last updated: July 12, 2026</p>
+
+  <p>TruthScore is a YouTube scam-risk checker made up of two parts: a Chrome extension and the
+  website at <a href="https://truthscore.online">truthscore.online</a>. This page explains what each
+  part does with your data.</p>
+
+  <h2>Chrome extension</h2>
+  <p>When you open the extension on a YouTube video page, it reads that page's title, channel name,
+  and thumbnail so it can display them in the popup, and sends the video's ID to our backend
+  (<code>truthscore.onrender.com</code>) to be scored. The extension only accesses the page you're
+  currently on, and only when you interact with it — it does not run in the background or read other
+  tabs.</p>
+  <p>The extension stores two things locally on your device, using Chrome's <code>storage</code> API,
+  and does not sync or transmit them anywhere except as described above:</p>
+  <ul>
+    <li>a daily count of how many free analyses you've used, so it can enforce the free-tier limit and reset it each day;</li>
+    <li>the result of your most recently analyzed video, so it can show a score badge if you return to that video.</li>
+  </ul>
+  <p>The extension does not collect your name, email address, browsing history, location, or any
+  personally identifiable information, and does not sell or share data with third parties.</p>
+
+  <h2>Backend analysis service</h2>
+  <p>To score a video, our backend fetches that video's public metadata, statistics, and top
+  comments from the YouTube Data API. It does not store this data after generating a response, and
+  does not log or retain your IP address or device information beyond standard hosting-provider
+  request logs.</p>
+
+  <h2>Website (truthscore.online)</h2>
+  <p>The website offers a free scan with an optional step: to reveal the full report, you can enter
+  your email address. If you do, that email (along with the video title and score you were viewing)
+  is sent to a Google Sheet we use to keep track of interest in the product. We use it to
+  occasionally follow up about the product — we do not sell it, and we do not use it for anything
+  unrelated to TruthScore. Your email is also saved in your browser's local storage so the site can
+  recognize you as a returning user and skip the gate next time.</p>
+  <p>If you choose to upgrade to TruthScore Pro, payment is handled entirely by PayPal via their
+  hosted checkout — we do not receive or store your card or PayPal account details ourselves.</p>
+
+  <h2>Third parties this product relies on</h2>
+  <ul>
+    <li><strong>YouTube Data API</strong> — public video/channel/comment data used to generate a score.</li>
+    <li><strong>ReturnYouTubeDislike API</strong> — hidden dislike-count estimates.</li>
+    <li><strong>Google Sheets / Google Apps Script</strong> — stores emails submitted through the website's unlock form.</li>
+    <li><strong>PayPal</strong> — processes Pro subscription payments on the website.</li>
+    <li><strong>Render</strong> — hosts our backend analysis service.</li>
+  </ul>
+
+  <h2>Your choices</h2>
+  <p>You can remove the extension's locally stored data at any time by uninstalling it, or by
+  clearing its storage via <code>chrome://extensions</code>. You can clear your saved email from the
+  website by clearing your browser's local storage for truthscore.online. To ask us to delete an
+  email you've submitted from our records, contact us using the details below.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about this policy or your data can be sent to
+  <a href="mailto:privacy@truthscore.online">privacy@truthscore.online</a>.</p>
+
+  <p style="margin-top:40px"><a href="/">&larr; Back to TruthScore</a></p>
+</body>
+</html>
