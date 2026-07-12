@@ -277,9 +277,23 @@
                 </div>
                 <script src="https://www.paypal.com/sdk/js?client-id=BAAHVQb6e24ePOj6Gcjx6n8K66OfYZTH76okeWOOtV8G6fUpyG9ZjkPsniOrOhWOJOLDpLzUOj1lvAQ6Sg&components=hosted-buttons&disable-funding=venmo&currency=USD"></script>
                 <script>
-                  paypal.HostedButtons({
-                    hostedButtonId: "RJ2LE5FD4KN8C",
-                  }).render("#paypal-container-RJ2LE5FD4KN8C")
+                  // Do NOT render on page load: the container lives inside
+                  // #resultSection, which starts with class="hidden" (display:none).
+                  // PayPal's SDK measures the container's size at render time, and a
+                  // display:none ancestor makes that 0x0, so the button silently fails
+                  // to appear. script.js calls window.renderPayPalButton() right after
+                  // it un-hides #resultSection, once the container actually has layout.
+                  window.renderPayPalButton = function () {
+                    var container = document.getElementById('paypal-container-RJ2LE5FD4KN8C');
+                    if (!container || container.childElementCount > 0) return; // missing or already rendered
+                    if (typeof paypal === 'undefined' || !paypal.HostedButtons) {
+                      setTimeout(window.renderPayPalButton, 200); // SDK still loading
+                      return;
+                    }
+                    paypal.HostedButtons({
+                      hostedButtonId: "RJ2LE5FD4KN8C",
+                    }).render("#paypal-container-RJ2LE5FD4KN8C");
+                  };
                 </script>
                 <p style="font-size:0.85rem;color:var(--muted);margin-top:8px">🔒 Secure checkout via PayPal · Cancel anytime</p>
                 <p style="font-size:0.8rem;color:#555;margin-top:6px">Also keeps the free tier alive for everyone 🙏</p>
@@ -375,7 +389,7 @@
         <footer>
             <p>⚠️ TruthScore provides risk indicators based on data analysis, not absolute guarantees. Always apply personal judgment and conduct additional research.</p>
             <p style="margin-top:8px">Disclaimer: TruthScore provides probabilistic risk signals from publicly available data. We use the ReturnYouTubeDislike API for hidden dislike data. Results are for informational purposes only.</p>
-            <p style="margin-top:16px">© 2026 TruthScore. All rights reserved.</p>
+            <p style="margin-top:16px">© 2026 TruthScore. All rights reserved. · <a href="/privacy.html">Privacy Policy</a></p>
         </footer>
     </main>
 
