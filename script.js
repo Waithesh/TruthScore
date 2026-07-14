@@ -279,7 +279,7 @@ function renderResults(payload) {
   }
 
   $('resultSection')?.classList.remove('hidden');
-  window.renderPayPalButton && window.renderPayPalButton(); // container has layout now, safe to render
+  window.renderPayPalButton && window.renderPayPalButton('paypal-container-RJ2LE5FD4KN8C'); // container has layout now, safe to render
   window.scrollTo({ top: ($('resultSection')?.offsetTop || 300) - 80, behavior: 'smooth' });
   scheduleProPopup(); // trigger popup 5 sec after results appear
 }
