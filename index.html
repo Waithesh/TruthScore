@@ -135,7 +135,7 @@
 <body>
     <header class="container">
         <a href="/" class="logo">🛡️ Truth<span>Score</span></a>
-        <a href="https://chrome.google.com/webstore/detail/truthscore" target="_blank" class="chrome-link">🛡️ Get Chrome Extension →</a>
+        <a href="https://chromewebstore.google.com/detail/lagfolbmkjkhafncheglpcekeipfmkel" target="_blank" class="chrome-link">🛡️ Get Chrome Extension →</a>
     </header>
 
     <main class="container">
@@ -172,6 +172,54 @@
         <div class="story-banner">
           <p>💡 <strong>Why this exists:</strong> I lost $800 to a YouTube course scam. The video had 300K likes and perfect comments — the red flags were hidden. TruthScore helps you see what creators don't want you to.</p>
         </div>
+
+        <!-- Standalone Pricing Section — always visible, no scan or email required.
+             This exists because visitors sent here from the Chrome extension's
+             "5 free analyses used, go unlimited" link land on the homepage having
+             scanned nothing and given no email — the pro-card further down is
+             gated behind both, so without this section those visitors could never
+             actually find a way to pay. #pricing anchor lets the extension link
+             straight here. -->
+        <section class="pro-card" id="pricing">
+            <div style="margin-bottom:8px">
+              <span style="background:var(--amber);color:#111;font-size:0.8rem;font-weight:700;padding:3px 12px;border-radius:20px;letter-spacing:0.05em">PRO</span>
+            </div>
+            <h3 style="font-size:1.8rem;margin-bottom:6px">⚡ TruthScore Pro</h3>
+            <div style="font-size:2.2rem;font-family:'Syne',sans-serif;font-weight:800;color:var(--amber);margin:10px 0">$9<span style="font-size:1rem;color:var(--muted);font-weight:400">/month</span></div>
+            <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:18px 0 24px">
+              <span style="background:rgba(255,255,255,0.06);padding:6px 14px;border-radius:20px;font-size:0.9rem">✅ Unlimited analyses</span>
+              <span style="background:rgba(255,255,255,0.06);padding:6px 14px;border-radius:20px;font-size:0.9rem">✅ No email gate</span>
+              <span style="background:rgba(255,255,255,0.06);padding:6px 14px;border-radius:20px;font-size:0.9rem">✅ Full flag breakdown</span>
+              <span style="background:rgba(255,255,255,0.06);padding:6px 14px;border-radius:20px;font-size:0.9rem">✅ Priority speed</span>
+            </div>
+            <!-- PayPal Hosted Button -->
+            <div style="width:100%;max-width:300px;margin:0 auto 16px;overflow:hidden">
+              <div id="paypal-container-pricing"></div>
+            </div>
+            <p style="font-size:0.85rem;color:var(--muted);margin-top:8px">🔒 Secure checkout via PayPal · Cancel anytime</p>
+            <p style="font-size:0.8rem;color:#555;margin-top:6px">Also keeps the free tier alive for everyone 🙏</p>
+        </section>
+
+        <script src="https://www.paypal.com/sdk/js?client-id=BAAHVQb6e24ePOj6Gcjx6n8K66OfYZTH76okeWOOtV8G6fUpyG9ZjkPsniOrOhWOJOLDpLzUOj1lvAQ6Sg&components=hosted-buttons&disable-funding=venmo&currency=USD"></script>
+        <script>
+          // Shared renderer for both PayPal button placements on this page:
+          // this standalone #pricing section (visible immediately) and the
+          // post-scan pro-card further down (rendered only once script.js
+          // un-hides #resultSection, since PayPal measures 0x0 in a hidden ancestor).
+          window.renderPayPalButton = function (containerId) {
+            var container = document.getElementById(containerId);
+            if (!container || container.childElementCount > 0) return; // missing or already rendered
+            if (typeof paypal === 'undefined' || !paypal.HostedButtons) {
+              setTimeout(function () { window.renderPayPalButton(containerId); }, 200); // SDK still loading
+              return;
+            }
+            paypal.HostedButtons({
+              hostedButtonId: "RJ2LE5FD4KN8C",
+            }).render('#' + containerId);
+          };
+          // This section is visible from page load, so render right away.
+          window.renderPayPalButton('paypal-container-pricing');
+        </script>
 
         <!-- Email Gate Section -->
         <section class="email-gate" id="emailGate">
@@ -275,26 +323,10 @@
                 <div style="width:100%;max-width:300px;margin:0 auto 16px;overflow:hidden">
                   <div id="paypal-container-RJ2LE5FD4KN8C"></div>
                 </div>
-                <script src="https://www.paypal.com/sdk/js?client-id=BAAHVQb6e24ePOj6Gcjx6n8K66OfYZTH76okeWOOtV8G6fUpyG9ZjkPsniOrOhWOJOLDpLzUOj1lvAQ6Sg&components=hosted-buttons&disable-funding=venmo&currency=USD"></script>
-                <script>
-                  // Do NOT render on page load: the container lives inside
-                  // #resultSection, which starts with class="hidden" (display:none).
-                  // PayPal's SDK measures the container's size at render time, and a
-                  // display:none ancestor makes that 0x0, so the button silently fails
-                  // to appear. script.js calls window.renderPayPalButton() right after
-                  // it un-hides #resultSection, once the container actually has layout.
-                  window.renderPayPalButton = function () {
-                    var container = document.getElementById('paypal-container-RJ2LE5FD4KN8C');
-                    if (!container || container.childElementCount > 0) return; // missing or already rendered
-                    if (typeof paypal === 'undefined' || !paypal.HostedButtons) {
-                      setTimeout(window.renderPayPalButton, 200); // SDK still loading
-                      return;
-                    }
-                    paypal.HostedButtons({
-                      hostedButtonId: "RJ2LE5FD4KN8C",
-                    }).render("#paypal-container-RJ2LE5FD4KN8C");
-                  };
-                </script>
+                <!-- SDK already loaded once, and window.renderPayPalButton already defined,
+                     by the standalone #pricing section above. script.js calls
+                     window.renderPayPalButton('paypal-container-RJ2LE5FD4KN8C') right after
+                     it un-hides #resultSection. -->
                 <p style="font-size:0.85rem;color:var(--muted);margin-top:8px">🔒 Secure checkout via PayPal · Cancel anytime</p>
                 <p style="font-size:0.8rem;color:#555;margin-top:6px">Also keeps the free tier alive for everyone 🙏</p>
             </div>
@@ -310,7 +342,7 @@
                 <li>✓ Creator history tracker</li>
                 <li>✓ Email alerts on new scams</li>
             </ul>
-            <a href="https://chrome.google.com/webstore/detail/truthscore" target="_blank" class="demo-btn" style="background:var(--blue);color:white;border-color:var(--blue);text-decoration:none;display:inline-block">🛡️ Add to Chrome — Free</a>
+            <a href="https://chromewebstore.google.com/detail/lagfolbmkjkhafncheglpcekeipfmkel" target="_blank" class="demo-btn" style="background:var(--blue);color:white;border-color:var(--blue);text-decoration:none;display:inline-block">🛡️ Add to Chrome — Free</a>
             <p style="font-size:0.9rem;color:var(--muted);margin-top:12px">Early members get 50% off Pro forever when we launch.</p>
         </section>
 
@@ -367,7 +399,7 @@
             <h3 style="font-family:'Syne',sans-serif;text-align:center;margin-bottom:25px">Frequently Asked Questions</h3>
             <div class="faq-item">
                 <h4>Is TruthScore free?</h4>
-                <p>Yes. Core scam detection is always free. The Chrome extension is live — <a href="https://chrome.google.com/webstore/detail/truthscore" target="_blank" style="color:var(--blue)">install it free here</a>. It gives you 5 analyses per day directly on YouTube.</p>
+                <p>Yes. Core scam detection is always free. The Chrome extension is live — <a href="https://chromewebstore.google.com/detail/lagfolbmkjkhafncheglpcekeipfmkel" target="_blank" style="color:var(--blue)">install it free here</a>. It gives you 5 analyses per day directly on YouTube.</p>
             </div>
             <div class="faq-item">
                 <h4>How accurate is the score?</h4>
