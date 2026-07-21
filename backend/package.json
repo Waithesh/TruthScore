@@ -17,10 +17,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google/generative-ai": "^0.21.0",
     "axios": "^1.6.8",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "youtube-transcript": "^1.2.1"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.19",
