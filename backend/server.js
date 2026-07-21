@@ -3,6 +3,8 @@ require('dotenv').config();
 const express = require('express');
 const axios   = require('axios');
 const cors    = require('cors');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { YoutubeTranscript }  = require('youtube-transcript');
 
 const app = express();
 app.use(express.json());
@@ -13,6 +15,12 @@ const YT_KEY = process.env.YOUTUBE_API_KEY;
 if (!YT_KEY) {
   console.warn('WARNING: YOUTUBE_API_KEY not set. Add it to Render environment variables.');
 }
+
+const GEMINI_KEY = process.env.GEMINI_API_KEY;
+if (!GEMINI_KEY) {
+  console.warn('WARNING: GEMINI_API_KEY not set. Transcript analysis will be skipped.');
+}
+const genAI = GEMINI_KEY ? new GoogleGenerativeAI(GEMINI_KEY) : null;
 
 // ── Health check — lets frontend ping to wake server ─────────────────
 app.get('/', (req, res) => res.json({ status: 'ok', service: 'TruthScore' }));
@@ -117,7 +125,58 @@ async function fetchYouTubeData(videoId) {
   };
 }
 
-// ── Analysis engine ───────────────────────────────────────────────────
+// ── Fetch transcript (unofficial — YouTube's caption API requires OAuth
+//    from the video owner, so this uses the public timedtext endpoint via
+//    youtube-transcript instead). This can fail for videos with no captions,
+//    or break if YouTube changes the endpoint — always treat as optional. ──
+async function fetchTranscript(videoId) {
+  try {
+    const chunks = await YoutubeTranscript.fetchTranscript(videoId);
+    const text = chunks.map(c => c.text).join(' ');
+    // Cap length — keeps Gemini token usage (and latency) predictable
+    return text.slice(0, 12000);
+  } catch (e) {
+    return null; // no captions available, or fetch blocked — that's fine
+  }
+}
+
+// ── Gemini transcript analysis — returns null on any failure so it never
+//    breaks the overall response. Never call this from client-side code;
+//    GEMINI_KEY only ever lives in this server's environment. ──
+async function analyzeTranscriptWithGemini(transcript, title) {
+  if (!genAI || !transcript) return null;
+
+  const prompt = `You are a fraud-detection assistant. Analyze this YouTube video transcript for manipulative sales tactics.
+
+Title: ${title}
+
+Transcript (may be truncated):
+"""${transcript}"""
+
+Return ONLY valid JSON, no markdown fences, no commentary, in this exact shape:
+{
+  "manipulationScore": <integer 0-100, where 100 = no manipulative language found, 0 = severe>,
+  "flags": [
+    { "type": "red" | "yellow" | "green", "text": "short finding", "impact": "why it matters" }
+  ]
+}
+Look specifically for: unverifiable income/results claims, fake urgency or scarcity, hidden or buried pitches,
+cult-like in-group language, fear-based pressure, and vague "secret method" claims. If none are found, return
+a single green flag saying so and a high manipulationScore.`;
+
+  try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const result = await model.generateContent(prompt);
+    const raw = result.response.text().trim().replace(/^```json\s*|\s*```$/g, '');
+    const parsed = JSON.parse(raw);
+    if (typeof parsed.manipulationScore !== 'number' || !Array.isArray(parsed.flags)) return null;
+    return parsed;
+  } catch (e) {
+    console.warn('Gemini analysis skipped:', e.message);
+    return null; // rate-limited, malformed response, etc. — degrade quietly
+  }
+}
+
 function analyzeVideoData(data) {
   const flags = [];
   let score = 55; // slightly optimistic baseline — most videos are not scams
@@ -350,11 +409,28 @@ app.post('/api/analyze', async (req, res) => {
 
     const data     = await fetchYouTubeData(videoId);
     const analysis = analyzeVideoData(data);
+
+    // Transcript analysis runs alongside the mechanical score, never blocking it.
+    // If it fails for any reason (no captions, Gemini rate limit, bad JSON),
+    // we fall back to the mechanical score untouched.
+    const transcript   = await fetchTranscript(videoId);
+    const geminiResult = await analyzeTranscriptWithGemini(transcript, data.title);
+
+    if (geminiResult) {
+      analysis.flags = [...analysis.flags, ...geminiResult.flags];
+      analysis.manipulationScore = geminiResult.manipulationScore;
+      // Blend: mechanical score stays the majority weight, transcript score
+      // can pull it down (or up) but cannot swing it wildly on its own.
+      analysis.score = Math.round(analysis.score * 0.6 + geminiResult.manipulationScore * 0.4);
+      analysis.score = Math.max(0, Math.min(100, analysis.score));
+    }
+
     const channelAgeYears = data.channel?.createdAt
       ? Math.floor((Date.now() - new Date(data.channel.createdAt).getTime()) / (1000 * 60 * 60 * 24 * 365))
       : null;
 
     return res.json({
+      geminiUsed: !!analysis.manipulationScore || analysis.manipulationScore === 0,
       video: {
         videoId:      data.videoId,
         title:        data.title,
