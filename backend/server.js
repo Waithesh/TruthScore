@@ -3,8 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const axios   = require('axios');
 const cors    = require('cors');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-const { YoutubeTranscript }  = require('youtube-transcript');
+const { YoutubeTranscript } = require('youtube-transcript');
 
 const app = express();
 app.use(express.json());
@@ -18,9 +17,45 @@ if (!YT_KEY) {
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 if (!GEMINI_KEY) {
-  console.warn('WARNING: GEMINI_API_KEY not set. Transcript analysis will be skipped.');
+  console.warn('WARNING: GEMINI_API_KEY not set. Web-grounded and transcript analysis will be skipped.');
 }
-const genAI = GEMINI_KEY ? new GoogleGenerativeAI(GEMINI_KEY) : null;
+const GEMINI_MODEL    = 'gemini-2.5-flash';
+const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+
+// ── Low-level Gemini call via plain REST (no SDK) ─────────────────────
+// grounded=true attaches Google Search so Gemini checks the LIVE WEB —
+// scam reports, forum threads, reviews — not just what YouTube's own
+// API says about itself. That's the actual point of this feature.
+async function callGemini(prompt, { grounded = false } = {}) {
+  if (!GEMINI_KEY) return null;
+  try {
+    const body = { contents: [{ parts: [{ text: prompt }] }] };
+    if (grounded) body.tools = [{ google_search: {} }];
+
+    const res = await axios.post(`${GEMINI_ENDPOINT}?key=${GEMINI_KEY}`, body, {
+      headers: { 'Content-Type': 'application/json' },
+      timeout: 20000
+    });
+    const parts = res.data?.candidates?.[0]?.content?.parts || [];
+    return parts.map(p => p.text || '').join('').trim() || null;
+  } catch (e) {
+    console.warn('[gemini] request failed:', e.response?.data?.error?.message || e.message);
+    return null;
+  }
+}
+
+// Pulls a JSON object out of a Gemini reply even if the model wrapped it
+// in commentary, citations, or code fences — grounded answers especially
+// tend to add explanatory text around the actual result.
+function extractJson(text) {
+  if (!text) return null;
+  const cleaned = text.replace(/```json|```/g, '');
+  const start = cleaned.indexOf('{');
+  const end   = cleaned.lastIndexOf('}');
+  if (start === -1 || end === -1 || end < start) return null;
+  try { return JSON.parse(cleaned.slice(start, end + 1)); }
+  catch (e) { return null; }
+}
 
 // ── Health check — lets frontend ping to wake server ─────────────────
 app.get('/', (req, res) => res.json({ status: 'ok', service: 'TruthScore' }));
@@ -142,12 +177,12 @@ async function fetchTranscript(videoId) {
   }
 }
 
-// ── Gemini transcript analysis — returns null on any failure so it never
-//    breaks the overall response. Never call this from client-side code;
-//    GEMINI_KEY only ever lives in this server's environment. ──
+// ── Gemini transcript analysis (bonus signal — only fires when captions
+//    happen to be available, which is often NOT the case). Returns null
+//    on any failure so it never breaks the overall response. ──
 async function analyzeTranscriptWithGemini(transcript, title) {
-  if (!genAI) { console.warn('[gemini] skipped: GEMINI_API_KEY not configured'); return null; }
-  if (!transcript) { console.warn('[gemini] skipped: no transcript available'); return null; }
+  if (!GEMINI_KEY) { console.warn('[gemini-transcript] skipped: GEMINI_API_KEY not configured'); return null; }
+  if (!transcript) { console.warn('[gemini-transcript] skipped: no transcript available'); return null; }
 
   const prompt = `You are a fraud-detection assistant. Analyze this YouTube video transcript for manipulative sales tactics.
 
@@ -167,21 +202,52 @@ Look specifically for: unverifiable income/results claims, fake urgency or scarc
 cult-like in-group language, fear-based pressure, and vague "secret method" claims. If none are found, return
 a single green flag saying so and a high manipulationScore.`;
 
-  try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-    const result = await model.generateContent(prompt);
-    const raw = result.response.text().trim().replace(/^```json\s*|\s*```$/g, '');
-    const parsed = JSON.parse(raw);
-    if (typeof parsed.manipulationScore !== 'number' || !Array.isArray(parsed.flags)) {
-      console.warn('[gemini] skipped: response did not match expected shape:', raw.slice(0,200));
-      return null;
-    }
-    console.log(`[gemini] success — manipulationScore=${parsed.manipulationScore}, flags=${parsed.flags.length}`);
-    return parsed;
-  } catch (e) {
-    console.warn('[gemini] skipped:', e.message);
-    return null; // rate-limited, malformed response, etc. — degrade quietly
+  const raw    = await callGemini(prompt, { grounded: false });
+  const parsed = extractJson(raw);
+  if (!parsed || typeof parsed.manipulationScore !== 'number' || !Array.isArray(parsed.flags)) {
+    console.warn('[gemini-transcript] skipped: bad response shape:', raw ? raw.slice(0, 200) : '(no response)');
+    return null;
   }
+  console.log(`[gemini-transcript] success — manipulationScore=${parsed.manipulationScore}, flags=${parsed.flags.length}`);
+  return parsed;
+}
+
+// ── Web-grounded reputation check — THE main new signal. Doesn't need a
+//    transcript, doesn't depend on YouTube's own numbers at all. Gemini
+//    actually searches the live web for scam reports, complaints, fact-
+//    checks of the specific claims in the title, forum/Reddit discussion,
+//    etc. This is what catches a channel that looks clean by every YouTube
+//    metric but has a documented bad reputation elsewhere on the internet. ──
+async function webGroundedCheck(title, channelTitle, description) {
+  if (!GEMINI_KEY) { console.warn('[gemini-web] skipped: GEMINI_API_KEY not configured'); return null; }
+
+  const prompt = `You are a fraud-detection researcher with live web search access. Investigate whether this YouTube video or channel has any documented scam reports, disputed claims, or credible criticism anywhere on the web — not just on YouTube itself.
+
+Video title: "${title}"
+Channel: "${channelTitle}"
+Description (may be truncated): "${(description || '').slice(0, 2000)}"
+
+Search for things like: the channel name plus "scam" or "reviews" or "complaints", fact-checks of any specific
+income or results claims in the title, Reddit/forum discussion, news coverage, refund complaints, watchdog sites.
+
+Return ONLY a JSON object, no markdown fences, no extra commentary, in this exact shape:
+{
+  "webTrustScore": <integer 0-100, 100 = no negative findings anywhere, 0 = well-documented scam>,
+  "flags": [
+    { "type": "red" | "yellow" | "green" | "blue", "text": "short finding", "source": "domain or 'no results found'" }
+  ]
+}
+If your search turns up nothing notable either way, say so explicitly with one blue flag and a neutral
+score around 60-70. Do not invent findings that your search did not actually surface.`;
+
+  const raw    = await callGemini(prompt, { grounded: true });
+  const parsed = extractJson(raw);
+  if (!parsed || typeof parsed.webTrustScore !== 'number' || !Array.isArray(parsed.flags)) {
+    console.warn('[gemini-web] skipped: bad response shape:', raw ? raw.slice(0, 200) : '(no response)');
+    return null;
+  }
+  console.log(`[gemini-web] success — webTrustScore=${parsed.webTrustScore}, flags=${parsed.flags.length}`);
+  return parsed;
 }
 
 function analyzeVideoData(data) {
@@ -417,27 +483,42 @@ app.post('/api/analyze', async (req, res) => {
     const data     = await fetchYouTubeData(videoId);
     const analysis = analyzeVideoData(data);
 
-    // Transcript analysis runs alongside the mechanical score, never blocking it.
-    // If it fails for any reason (no captions, Gemini rate limit, bad JSON),
-    // we fall back to the mechanical score untouched.
+    // Three independent signals, blended with NORMALIZED weights — meaning
+    // if a signal doesn't fire (e.g. transcript almost always won't, since
+    // most videos have it disabled), the remaining signals fill in the full
+    // weight rather than silently underweighting the score toward 0.
+    const weighted = [{ score: analysis.score, weight: 0.55 }]; // mechanical (existing) signal
+
+    // Web-grounded check — the main new "internet perspective" signal.
+    // Runs on every video regardless of captions; this is the one that
+    // matters most for what you're trying to catch.
+    const webResult = await webGroundedCheck(data.title, data.channelTitle, data.description);
+    if (webResult) {
+      analysis.flags = [...analysis.flags, ...webResult.flags];
+      analysis.webTrustScore = webResult.webTrustScore;
+      weighted.push({ score: webResult.webTrustScore, weight: 0.30 });
+    }
+
+    // Transcript analysis — bonus signal, only fires when captions happen
+    // to be available. Never blocks or degrades the response if absent.
     const transcript   = await fetchTranscript(videoId);
     const geminiResult = await analyzeTranscriptWithGemini(transcript, data.title);
-
     if (geminiResult) {
       analysis.flags = [...analysis.flags, ...geminiResult.flags];
       analysis.manipulationScore = geminiResult.manipulationScore;
-      // Blend: mechanical score stays the majority weight, transcript score
-      // can pull it down (or up) but cannot swing it wildly on its own.
-      analysis.score = Math.round(analysis.score * 0.6 + geminiResult.manipulationScore * 0.4);
-      analysis.score = Math.max(0, Math.min(100, analysis.score));
+      weighted.push({ score: geminiResult.manipulationScore, weight: 0.15 });
     }
+
+    const totalWeight = weighted.reduce((sum, w) => sum + w.weight, 0);
+    analysis.score = Math.round(weighted.reduce((sum, w) => sum + w.score * w.weight, 0) / totalWeight);
+    analysis.score = Math.max(0, Math.min(100, analysis.score));
 
     const channelAgeYears = data.channel?.createdAt
       ? Math.floor((Date.now() - new Date(data.channel.createdAt).getTime()) / (1000 * 60 * 60 * 24 * 365))
       : null;
 
     return res.json({
-      geminiUsed: !!analysis.manipulationScore || analysis.manipulationScore === 0,
+      geminiUsed: analysis.webTrustScore !== undefined || analysis.manipulationScore !== undefined,
       video: {
         videoId:      data.videoId,
         title:        data.title,
