@@ -133,9 +133,11 @@ async function fetchTranscript(videoId) {
   try {
     const chunks = await YoutubeTranscript.fetchTranscript(videoId);
     const text = chunks.map(c => c.text).join(' ');
+    console.log(`[transcript] fetched ${chunks.length} caption chunks, ${text.length} chars for ${videoId}`);
     // Cap length — keeps Gemini token usage (and latency) predictable
     return text.slice(0, 12000);
   } catch (e) {
+    console.warn(`[transcript] fetch failed for ${videoId}:`, e.message);
     return null; // no captions available, or fetch blocked — that's fine
   }
 }
@@ -144,7 +146,8 @@ async function fetchTranscript(videoId) {
 //    breaks the overall response. Never call this from client-side code;
 //    GEMINI_KEY only ever lives in this server's environment. ──
 async function analyzeTranscriptWithGemini(transcript, title) {
-  if (!genAI || !transcript) return null;
+  if (!genAI) { console.warn('[gemini] skipped: GEMINI_API_KEY not configured'); return null; }
+  if (!transcript) { console.warn('[gemini] skipped: no transcript available'); return null; }
 
   const prompt = `You are a fraud-detection assistant. Analyze this YouTube video transcript for manipulative sales tactics.
 
@@ -169,10 +172,14 @@ a single green flag saying so and a high manipulationScore.`;
     const result = await model.generateContent(prompt);
     const raw = result.response.text().trim().replace(/^```json\s*|\s*```$/g, '');
     const parsed = JSON.parse(raw);
-    if (typeof parsed.manipulationScore !== 'number' || !Array.isArray(parsed.flags)) return null;
+    if (typeof parsed.manipulationScore !== 'number' || !Array.isArray(parsed.flags)) {
+      console.warn('[gemini] skipped: response did not match expected shape:', raw.slice(0,200));
+      return null;
+    }
+    console.log(`[gemini] success — manipulationScore=${parsed.manipulationScore}, flags=${parsed.flags.length}`);
     return parsed;
   } catch (e) {
-    console.warn('Gemini analysis skipped:', e.message);
+    console.warn('[gemini] skipped:', e.message);
     return null; // rate-limited, malformed response, etc. — degrade quietly
   }
 }
