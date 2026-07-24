@@ -483,6 +483,11 @@ app.post('/api/analyze', async (req, res) => {
     const data     = await fetchYouTubeData(videoId);
     const analysis = analyzeVideoData(data);
 
+    // Tag the mechanical flags with their origin now, before anything else
+    // gets merged in — this is what lets the frontend group results by
+    // source instead of showing one flat, undifferentiated list.
+    analysis.flags = analysis.flags.map(f => ({ ...f, origin: 'youtube' }));
+
     // Three independent signals, blended with NORMALIZED weights — meaning
     // if a signal doesn't fire (e.g. transcript almost always won't, since
     // most videos have it disabled), the remaining signals fill in the full
@@ -494,7 +499,7 @@ app.post('/api/analyze', async (req, res) => {
     // matters most for what you're trying to catch.
     const webResult = await webGroundedCheck(data.title, data.channelTitle, data.description);
     if (webResult) {
-      analysis.flags = [...analysis.flags, ...webResult.flags];
+      analysis.flags = [...analysis.flags, ...webResult.flags.map(f => ({ ...f, origin: 'web' }))];
       analysis.webTrustScore = webResult.webTrustScore;
       weighted.push({ score: webResult.webTrustScore, weight: 0.30 });
     }
@@ -504,7 +509,7 @@ app.post('/api/analyze', async (req, res) => {
     const transcript   = await fetchTranscript(videoId);
     const geminiResult = await analyzeTranscriptWithGemini(transcript, data.title);
     if (geminiResult) {
-      analysis.flags = [...analysis.flags, ...geminiResult.flags];
+      analysis.flags = [...analysis.flags, ...geminiResult.flags.map(f => ({ ...f, origin: 'transcript' }))];
       analysis.manipulationScore = geminiResult.manipulationScore;
       weighted.push({ score: geminiResult.manipulationScore, weight: 0.15 });
     }
